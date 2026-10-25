@@ -72,7 +72,21 @@ A hunched colossus of white echo-plating that crawls after Wren on long arms. It
 - Throws dark crystal shards in arcs that have to be shot down (or jabbed by the spear).
 - Enrages during the hold: faster, more shards, cores stay closed for less time.
 - Killing it is optional; reaching the rift is the win. Killing it pays a burst of anomalies.
-- Clearing rift 5 ends chapter 1 and Sync recovers the first **anchor**. Sol's scene will hang off this moment.
+- Clearing rift 5 ends chapter 1 and Sync recovers the first **anchor**.
+
+### Sol, first meeting — built
+
+Plays the first time Wren finishes the hold at rift 5. Silent-film style: letterboxed, no voices, intertitle cards in a serif italic.
+
+1. The anchor (a faceted crystal of cold blue light) rises above Sync at the crack. The crack turns blue and tears open.
+2. A still place: a huge stopped clock, drifting motes, a glassy floor. Sol stands with her back turned; her back half is unbound (white echo plating, colour-fringed, flickering).
+3. Wren walks in. **"Sol?"** She turns. **"Wren…? You came."**
+4. The anchor floats from Sync to Wren's hand. He steps closer and holds it out. **"Take it. Come home."**
+5. She reaches for it. The anchor flickers and goes dark. Her unbound half floods over her; her eye goes red. **"I can't. It won't let me go."**
+6. A white tentacle-arm lashes out of her and through Wren; he shatters. **"Not yet."**
+7. Fade to black → paradox is paid and the cycle resets to rift 1.
+
+Later clears of rift 5: the anchor rises again, **Wren shakes his head**, Sync tucks it away and tears a normal gold rift. The run continues to rift 6.
 
 ## Mechanics in story terms
 

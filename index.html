@@ -2,7 +2,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Cormorant+Garamond:ital,wght@1,500&display=swap">
 <style>
 /* Layout: one fixed 1280x640 stage scaled to fit; HUD and panels are HTML over the canvas. Single dusk-neon look by design. */
 :root{
@@ -94,6 +94,8 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .gcard .stats{font-family:var(--body);font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
 .gcard .buy{width:100%}
 .rows .ancrow b{color:var(--mag)}
+#skip{position:absolute;right:28px;bottom:24px;font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;background:rgba(0,0,0,.4);color:var(--dim);border:1px solid rgba(255,255,255,.2);padding:7px 14px;cursor:pointer;z-index:2}
+#skip:hover{color:var(--ink)}
 #bossbar{left:50%;top:64px;transform:translateX(-50%);width:420px;display:grid;gap:4px;font-size:12px;letter-spacing:.2em;color:#ffb347;text-align:center}
 #bossbar .bb{height:7px;background:rgba(255,255,255,.1);clip-path:polygon(0 0,100% 0,98% 100%,2% 100%)}
 #bossbar .bbf{height:100%;width:100%;background:linear-gradient(90deg,#ffb347,#ff4f9a)}
@@ -113,6 +115,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .reset b{display:block;font-size:15px;margin-bottom:2px}
 .reset span{font-family:var(--body);font-size:12.5px;line-height:1.4;color:var(--dim)}
 .reset .buy{width:132px}
+.reset.solo{grid-template-columns:1fr}
 .reset .buy.armed{background:#fff;color:#b3122a}
 .carry{margin-left:6px;font-size:12px;font-weight:500;color:var(--line);font-variant-numeric:tabular-nums}
 .note{margin:6px 0 0;font-family:var(--body);font-size:12px;color:var(--dim)}
@@ -129,11 +132,14 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
   --p:1;background-image:conic-gradient(rgba(94,242,255,.22) calc(var(--p)*360deg),transparent 0)}
 #dodge svg{width:40px;height:40px;grid-area:1/1}
 #dodge b{grid-area:1/1;font-size:26px;font-variant-numeric:tabular-nums;color:var(--ink)}
-#spearPips{left:28px;top:calc(50% + 56px);width:92px;display:flex;justify-content:center;gap:5px;align-items:center;font-size:10px;letter-spacing:.12em;color:var(--dim)}
-#spearPips i{width:14px;height:5px;background:rgba(255,179,71,.18);position:relative;overflow:hidden}
-#spearPips i.on{background:#ffb347}
-#spearPips i b{position:absolute;left:0;top:0;bottom:0;background:rgba(255,179,71,.6)}
-#dodge.cool{cursor:default}
+#spearPips{left:45px;top:calc(50% + 56px);width:58px;height:58px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.06);border:1.5px solid rgba(255,179,71,.45);color:#ffd08a;
+  --p:1;background-image:conic-gradient(rgba(255,179,71,.28) calc(var(--p)*360deg),transparent 0)}
+#spearPips svg{width:30px;height:30px;grid-area:1/1}
+#spearPips .cd{grid-area:1/1;font-size:19px;color:var(--ink);font-variant-numeric:tabular-nums}
+#spearPips .ch{position:absolute;right:-4px;bottom:-4px;min-width:20px;height:20px;border-radius:10px;background:#ffb347;color:var(--bg);font-size:12px;display:grid;place-items:center;font-variant-numeric:tabular-nums}
+#spearPips.empty{border-color:rgba(255,179,71,.2)}
+#spearPips.empty svg{opacity:.2}#dodge.cool{cursor:default}
 #dodge.cool svg{opacity:.18}
 #dodge:not(.cool):hover{background-color:rgba(94,242,255,.12)}
 .autochip{align-self:flex-end;display:grid;gap:2px;padding:6px 10px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--line);background:rgba(18,10,34,.72);border:1px dashed rgba(94,242,255,.45)}
@@ -154,6 +160,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
     </div>
     <div id="chron" class="hud"><svg viewBox="0 0 20 26" aria-hidden="true"><path d="M10 1 19 13 10 25 1 13Z" fill="#ffb347" stroke="#fff2c4" stroke-width="1.2"/><path d="M10 1v24M1 13h18" stroke="#0b0716" stroke-opacity=".35"/></svg><b id="chronN">0</b><span class="anc-hud"><svg viewBox="0 0 14 15" aria-hidden="true"><path d="M7 .5 13.5 4.2v6.6L7 14.5.5 10.8V4.2Z" fill="#ff4f9a" stroke="#ffd1e6" stroke-width="1"/></svg><b id="ancN">0</b></span><span class="px-hud" id="pxHud" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 15 8 8 15 1 8Z" fill="#ff5a5a" stroke="#ffd0d0" stroke-width="1"/><path d="M8 4v8" stroke="#3a0d14" stroke-width="1.6"/></svg><b id="pxN">0</b></span></div>
     <button id="mute" type="button">Sound on</button>
+    <button id="skip" type="button" hidden>Skip ›</button>
     <div id="cbar" hidden></div>
     <div id="bossbar" class="hud" hidden><span>The Hollow Hour</span><div class="bb"><div class="bbf"></div></div></div>
     <button id="dodge" type="button" hidden aria-label="Rewind step (Space)"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M21 10 11 20l10 10M31 10 21 20l10 10" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg><b id="dodgeN"></b></button>
@@ -207,6 +214,7 @@ const GUNS={
   bolt:{name:'Bolt pistol',unlock:0,col:'#ffb347',blurb:'Single bolts. Headshots crit for 2.5x damage.',ups:{
     power:{name:'Bolt power',vals:[14,17,20,24,28,32,37,42,47,52,58,64,70,77,85],cost:COST,fmt:v=>v+' damage per bolt'},
     rate:{name:'Fire rate',vals:FIRE,cost:COST,fmt:v=>v.toFixed(2)+' s between shots'},
+    size:{name:'Bolt size',vals:[0,2,4,6,8,10],cost:[20,50,110,220,400],fmt:v=>v?'+'+v+' bolt radius, edge hits on a head still crit':'Standard bolts'},
   }},
   arc:{name:'Arc gun',unlock:5,start:3,col:'#5ef2ff',blurb:'Instant lightning that jumps between nearby echoes and stuns everything it hits. No headshot crits.',ups:{
     power:{name:'Arc power',vals:[13,15,18,21,25,29,33,38,42,47,52,57,63,69,75],cost:COST,fmt:v=>v+' damage per strike'},
@@ -256,7 +264,7 @@ const PERKS={
 };
 const perk=k=>PERKS[k].vals[save.perk[k]];
 const SKEY='sdr-rift-v5';
-const fresh=()=>({level:1,coins:0,anchors:0,gun:'bolt',guns:{bolt:{owned:true,power:0,rate:0},arc:{owned:false,power:0,rate:0,chain:0}},gen:{sight:0,salvage:0},kit:{mount:false,auto:false,shield:false,capacitor:false,crit:false,boots:false,spear:false,after:false},lv:{spear:0,rift:0,dodge:0,after:0},cons:{grenade:0,wall:0,overclock:0,shock:0,lull:0},auto:{item:'wall',trigger:'close'},
+const fresh=()=>({level:1,coins:0,anchors:0,gun:'bolt',guns:{bolt:{owned:true,power:0,rate:0,size:0},arc:{owned:false,power:0,rate:0,chain:0}},gen:{sight:0,salvage:0},kit:{mount:false,auto:false,shield:false,capacitor:false,crit:false,boots:false,spear:false,after:false},lv:{spear:0,rift:0,dodge:0,after:0},cons:{grenade:0,wall:0,overclock:0,shock:0,lull:0},auto:{item:'wall',trigger:'close'},
   px:0,perk:{start:0,memory:0,anchor:0,seed:0,train:0},best:0,cycles:0});
 function load(){
   const f=fresh();
@@ -278,7 +286,7 @@ const gen=k=>GEN[k].vals[save.gen[k]];
 const salv=()=>gen('salvage')*perk('memory');
 function newCycle(){
   const gain=save.level-1;
-  const keep={px:save.px+gain,perk:save.perk,best:Math.max(save.best,gain),cycles:save.cycles+1,auto:save.auto};
+  const keep={px:save.px+gain,perk:save.perk,best:Math.max(save.best,gain),cycles:save.cycles+1,auto:save.auto,storyAnchors:save.storyAnchors||0};
   save=Object.assign(fresh(),keep);
   save.coins=perk('start');save.anchors=perk('seed');
   save.guns.bolt.power=save.guns.bolt.rate=perk('train');
@@ -486,7 +494,7 @@ function fire(){
   G.fireT=gunStat('rate')*(G.oc>0?.5:1);G.recoil=arc?3:5;G.shake=Math.max(G.shake,1.5);
   const m=muzzle();
   if(arc){arcFire(m);return}
-  G.bolts.push({x:m.x,y:m.y,vx:Math.cos(G.aim)*1400,vy:Math.sin(G.aim)*1400,life:1.1,arc:false});
+  G.bolts.push({x:m.x,y:m.y,vx:Math.cos(G.aim)*1400,vy:Math.sin(G.aim)*1400,life:1.1,arc:false,rad:boltRad()});
   for(let i=0;i<3;i++)G.parts.push({x:m.x,y:m.y,vx:Math.cos(G.aim)*rand(60,200)+rand(-60,60),vy:Math.sin(G.aim)*rand(60,200)+rand(-60,60),life:.18,size:2.5,col:'#ffd08a'});
   sfx.shot();
 }
@@ -511,17 +519,21 @@ function arcSpark(p){for(let i=0;i<10;i++){const a=rand(0,Math.PI*2),v=rand(60,2
 const centre=e=>e.type==='wraith'?{x:e.x,y:e.y}:{x:(e.P[1].x+e.P[2].x)/2,y:(e.P[1].y+e.P[2].y)/2};
 function findHit(b){
   const B=G.boss&&G.boss.in&&!G.boss.dead?G.boss:null;
-  if(B)for(const p of B.proj)if(Math.hypot(b.x-p.x,b.y-p.y)<13)return{proj:p};
+  const R=b.rad||0;
+  if(B)for(const p of B.proj)if(Math.hypot(b.x-p.x,b.y-p.y)<13+R)return{proj:p};
   const r=findEcho(b);if(r)return r;
-  if(B){const part=bossHitTest(b.x,b.y);if(part)return{boss:part}}
+  if(B){const part=bossHitTest(b.x,b.y,R);if(part)return{boss:part}}
   return null;
 }
+// bolt radius from the Bolt size upgrade (pistol only). parts() lists the head first, so any overlap with a head is a crit
+const boltRad=()=>GUNS.bolt.ups.size.vals[save.guns.bolt.size||0];
 function findEcho(b){
+  const R=b.rad||0;
   for(const e of G.es){
     if(e.dead||e.phased||e.state==='idle'&&G.state!=='play')continue;
-    if(e.type==='wraith'){if(Math.hypot(b.x-e.x,b.y-e.y)<=15*e.s)return{e,part:'body'};continue}
-    if(Math.abs(b.x-e.x)>45*e.s||b.y<e.P[0].y-20*e.s||b.y>e.fy+6)continue;
-    for(const[a,bb,r,part]of parts(e))if(distSeg(b.x,b.y,a,bb)<=r)return{e,part};
+    if(e.type==='wraith'){if(Math.hypot(b.x-e.x,b.y-e.y)<=15*e.s+R)return{e,part:'body'};continue}
+    if(Math.abs(b.x-e.x)>45*e.s+R||b.y<e.P[0].y-20*e.s-R||b.y>e.fy+6+R)continue;
+    for(const[a,bb,r,part]of parts(e))if(distSeg(b.x,b.y,a,bb)<=r+R)return{e,part};
   }
   return null;
 }
@@ -630,17 +642,36 @@ function dodge(){
 $('#dodge').addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();audioInit();dodge()});
 addEventListener('keydown',ev=>{if(ev.code==='Space'&&G.state==='play'){ev.preventDefault();dodge()}});
 const SPEAR_REFILL=6,SPEAR_RANGE=78;
-function jab(e){
-  G.spear--;G.spearCd=.3;
-  const c=centre(e),from={x:G.px+8,y:ground(G.px)-54};
-  G.jabs.push({x1:from.x,y1:from.y,x2:c.x,y2:c.y,t:.14});
-  noise(.08,1800,.18,'bandpass');tone(320,.1,.08,'square',140);G.shake=Math.max(G.shake,3);
-  damage(e,60*(1+.15*(G.n-1)),c.x,c.y,500,-60,false);
-  if(!e.dead){
-    if(e.type==='wraith'){e.diving=false;e.x+=110;e.y-=70}
-    else{e.x+=60;e.frozen=Math.max(e.frozen,.35)}
+const SPEAR_SVG='<svg viewBox="0 0 30 30" aria-hidden="true"><path d="M5 25 21 9" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M18 6h7v7l-4 2-5-5z" fill="currentColor"/><path d="M7 19l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+// spear: a short charge, then Wren drives a long energy spear forward. A beast-shaped wake of blue light rides behind it,
+// and it pierces everything along its length, hitting each echo (and shard, and the boss) once.
+const JAB_T=.46,SPEAR_LEN=300,SPEAR_BAND=26;
+function spearStrike(tx,ty){
+  G.spear--;G.spearCd=.35;
+  const from={x:G.px+12,y:ground(G.px)-52},ang=clamp(Math.atan2(ty-from.y,tx-from.x),-.5,.35);
+  const to={x:from.x+Math.cos(ang)*SPEAR_LEN,y:from.y+Math.sin(ang)*SPEAR_LEN};
+  G.jabs.push({x1:from.x,y1:from.y,x2:to.x,y2:to.y,t:JAB_T,c:'spear',ang,teeth:Array.from({length:6},()=>rand(.7,1.3))});
+  G.lunge=.26;G.slow=Math.max(G.slow,RM?0:.08);G.shake=Math.max(G.shake,RM?0:9);
+  noise(.18,700,.36);noise(.1,5000,.18,'highpass');tone(140,.25,.16,'sawtooth',50);tone(900,.2,.05,'sine',1800);
+  const dmg=60*(1+.15*(G.n-1));
+  for(const e of G.es){
+    if(e.dead||e.phased||e.state!=='walk')continue;
+    const c=centre(e),hit=distSeg(c.x,c.y,from,to)<SPEAR_BAND+12*e.s||distSeg(e.P[0].x,e.P[0].y,from,to)<SPEAR_BAND;
+    if(!hit)continue;
+    damage(e,dmg,c.x,c.y,700,-80,false);spearBurst(c.x,c.y);
+    if(!e.dead){if(e.type==='wraith'){e.diving=false;e.x+=130;e.y-=80}else{e.x+=90;e.stun=Math.max(e.stun||0,.4)}}
   }
+  if(G.boss){
+    for(const p of G.boss.proj)if(distSeg(p.x,p.y,from,to)<SPEAR_BAND)popProj(p);
+    if(bossOnScreen())for(let d=0;d<=SPEAR_LEN;d+=12){const px=from.x+Math.cos(ang)*d,py=from.y+Math.sin(ang)*d,part=bossHitTest(px,py,8);if(part){bossHit(part,dmg,px,py);spearBurst(px,py);break}}
+  }
+  // ground debris kicked up along the thrust
+  for(let i=0;i<14;i++){const x=from.x+rand(20,SPEAR_LEN),gy=ground(x);G.parts.push({x,y:gy-2,vx:rand(80,320),vy:rand(-160,-30),life:rand(.25,.5),size:rand(2,4),col:pick(['#a99ec4','#fff2c4','#5a5170']),g:1})}
 }
+function spearBurst(x,y){
+  for(let i=0;i<14;i++){const a=rand(-1,1),v=rand(160,420);G.parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-40,life:rand(.2,.45),size:rand(2,4),col:pick(['#fff2c4','#ffb347','#ff8a3d','#ffffff'])})}
+}
+function jab(e){const c=centre(e);spearStrike(c.x,c.y)}
 function lose(){
   if(G.state!=='play'||G.inv>0)return;
   if(G.shield){breakShield();return}
@@ -662,9 +693,9 @@ function bossGeo(){
   return{x,gy,body:{x:x+18,y:gy-128+bob,rx:66,ry:84},head:{x:x-38,y:gy-206+bob,r:34},
     cores:[{x:x-22,y:gy-120+bob},{x:x+16,y:gy-184+bob},{x:x+46,y:gy-74+bob}]};
 }
-function bossHitTest(px,py){
+function bossHitTest(px,py,R=0){
   const g=bossGeo();
-  if(G.boss.open)for(const c of g.cores)if(Math.hypot(px-c.x,py-c.y)<15)return'core';
+  if(G.boss.open)for(const c of g.cores)if(Math.hypot(px-c.x,py-c.y)<15+R)return'core';
   if(Math.hypot(px-g.head.x,py-g.head.y)<g.head.r)return'body';
   const dx=(px-g.body.x)/g.body.rx,dy=(py-g.body.y)/g.body.ry;if(dx*dx+dy*dy<1)return'body';
   return null;
@@ -781,6 +812,191 @@ function drawBossCard(){
   ctx.globalAlpha=1;
 }
 
+// ---------- cutscenes ----------
+// silent-film style: no voices, letterboxed, the story told in intertitle cards. Times below are real seconds.
+let SC=null;
+const HUD_IN_SCENE=['#cbar','#dodge','#spearPips','#bossbar','#trip','#chron'];
+function startScene(kind){
+  SC={kind,t:0,len:kind==='sol'?29:7.4,parts:[],fx:{},motes:Array.from({length:70},()=>({x:rand(0,W),y:rand(0,470),s:rand(1,2.5),v:rand(4,14)}))};
+  G.state='scene';G.blue=0;G.headShake=0;
+  for(const e of G.es)if(!e.dead)e.dead=true;
+  if(G.boss&&!G.boss.dead){G.boss.dead=true;G.boss.proj=[]}
+  G.bolts=[];G.arcs=[];G.jabs=[];G.tears=[];G.nades=[];G.shards=[];G.parts=[];G.pickups=[];G.clocks=[];G.rings=[];G.banner=null;G.bossCard=0;G.flashW=0;G.shake=0;
+  for(const s of HUD_IN_SCENE)$(s).hidden=true;
+  $('#skip').hidden=false;
+}
+function endScene(){
+  const k=SC.kind;SC=null;$('#skip').hidden=true;G.blue=0;G.headShake=0;
+  $('#trip').hidden=false;$('#chron').hidden=false;
+  if(k==='sol')solReset();else{G.state='over';showClear()}
+}
+$('#skip').addEventListener('click',()=>{if(SC)SC.t=SC.len});
+const once=(k,fn)=>{if(!SC.fx[k]){SC.fx[k]=1;fn()}};
+const ease=x=>x<=0?0:x>=1?1:x*x*(3-2*x);
+const span=(t,a,b)=>clamp((t-a)/(b-a),0,1);
+function solReset(){
+  save.storyAnchors=Math.max(save.storyAnchors||0,G.n/5);
+  save.level=G.n+1;save.best=Math.max(save.best,G.n);
+  const gain=newCycle();
+  buildLevel(1);G.state='over';
+  showMsg(`Cycle ${save.cycles+1}`,'Thrown back',
+    `<div class="pxrow">Paradox earned<b>+${gain}</b></div><div>Best ever<b>Rift ${save.best}</b></div><p>Sol's unbound half threw Wren back to where it all began. He remembers more this time. Spend paradox in the Paradox tab.</p>`,
+    'To the loadout',()=>{enterShop();shopTab='px';renderShop()},false);
+}
+function renderScene(rdt){
+  const t=SC.t;
+  for(const p of SC.parts){p.life-=rdt;p.vy+=500*rdt;p.x+=p.vx*rdt;p.y+=p.vy*rdt;p.a+=p.va*rdt}
+  SC.parts=SC.parts.filter(p=>p.life>0);
+  if(SC.kind==='refuse')sceneRefuse(t,rdt);
+  else if(t<5)sceneAnchor(t,rdt);
+  else sceneSol(t-5,rdt);
+  ctx.setTransform(K,0,0,K,0,0);
+  const k=Math.min(1,t/.6,(SC.len-t)/.4),h=56*Math.max(0,k);
+  ctx.fillStyle='#000';ctx.fillRect(0,0,W,h);ctx.fillRect(0,H-h,W,h);
+}
+// the anchor: a faceted crystal of cold blue light
+function drawAnchor(x,y,s,dim){
+  if(s<=0)return;
+  ctx.save();ctx.translate(x,y);ctx.scale(s,s);
+  const g=ctx.createRadialGradient(0,0,2,0,0,46);g.addColorStop(0,`rgba(200,235,255,${.7*(1-dim)})`);g.addColorStop(1,'rgba(90,160,255,0)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,46,0,7);ctx.fill();
+  ctx.rotate(SC?SC.t*.6:0);
+  ctx.fillStyle=dim>.5?'#5a6a8a':'#dff1ff';ctx.beginPath();for(let i=0;i<6;i++){const a=i/6*Math.PI*2;ctx.lineTo(Math.cos(a)*14,Math.sin(a)*17)}ctx.closePath();ctx.fill();
+  ctx.strokeStyle=dim>.5?'#2c3550':'#6fb8ff';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.beginPath();for(let i=0;i<6;i+=2){const a=i/6*Math.PI*2;ctx.moveTo(0,0);ctx.lineTo(Math.cos(a)*14,Math.sin(a)*17)}ctx.stroke();
+  ctx.restore();
+}
+// part 1 (first time at rift 5): the anchor appears over Sync, the crack turns blue and tears open
+function sceneAnchor(t,rdt){
+  G.time+=rdt;
+  G.blue=ease(span(t,2,3.2));
+  if(t>=3.2){G.opened=true;G.openT=t-3.2;once('rip',()=>{noise(1.4,900,.45);tone(220,1.4,.18,'sine',880)})}
+  once('chime',()=>tone(880,1.4,.06,'sine',1320));
+  if(t>2)once('blue',()=>tone(440,1.2,.07,'triangle',990));
+  render();
+  ctx.setTransform(K,0,0,K,-G.camX*K,0);
+  const s=G.sync,a=ease(span(t,.8,2));
+  if(!G.opened||t<3.6)drawAnchor(s.x,s.y-50+Math.sin(t*2)*3,a,0);
+  ctx.setTransform(K,0,0,K,0,0);
+  const fl=t<3.5?Math.max(0,1-(t-3.2)/.3)*(t>=3.2?.8:0):ease(span(t,4.3,5));
+  if(fl>0){ctx.fillStyle=`rgba(230,242,255,${fl})`;ctx.fillRect(0,0,W,H)}
+}
+// later clears of rift 5: the anchor appears, Wren shakes his head, Sync puts it away and tears a normal rift instead
+function sceneRefuse(t,rdt){
+  G.time+=rdt;
+  const s=G.sync;
+  G.headShake=t>1.8&&t<3?Math.sin((t-1.8)*16)*3.5*Math.sin(span(t,1.8,3)*Math.PI):0;
+  const grow=ease(span(t,.6,1.6)),shrink=ease(span(t,3.2,4));
+  if(t>=4.2){G.opened=true;G.openT=t-4.2;once('rip',()=>{noise(1.2,900,.5);tone(110,1,.25,'sawtooth',30)})}
+  if(t>4.6){G.px+=(PORTAL-G.px)*Math.min(1,rdt*5);G.pfade=ease(span(t,4.8,5.8))}
+  once('chime',()=>tone(880,1.2,.05,'sine',1320));
+  render();
+  ctx.setTransform(K,0,0,K,-G.camX*K,0);
+  if(shrink<1)drawAnchor(s.x,s.y-50+(46*shrink),grow*(1-shrink),0);
+  ctx.setTransform(K,0,0,K,0,0);
+  const fl=t>=4.2?Math.max(0,1-(t-4.2)/.5)*.7:0;if(fl>0){ctx.fillStyle=`rgba(255,244,214,${fl})`;ctx.fillRect(0,0,W,H)}
+}
+// a character in the scene's flat style. Returns the world position of the hand.
+function drawFig(x,fy,o){
+  const f=o.sx??o.facing;
+  ctx.save();ctx.translate(x,fy);ctx.scale(f,1);if(o.alpha!=null)ctx.globalAlpha*=o.alpha;
+  const ghost=o.ghost,coat=ghost||o.coat,coat2=ghost||o.coat2,dark=ghost||'#141826',hood=ghost||o.hood;
+  const w=o.walk;
+  for(const side of[1,-1]){
+    const a=w!=null?Math.sin(w+(side>0?0:Math.PI))*.42:.06*side,knee={x:Math.sin(a)*16,y:-32+Math.cos(a)*16},b=a+(w!=null?Math.max(0,-Math.cos(w+(side>0?0:Math.PI)))*.5:0);
+    seg({x:0,y:-32},knee,7,dark);seg(knee,{x:knee.x+Math.sin(b)*16,y:knee.y+Math.cos(b)*16},7,dark);
+  }
+  ctx.fillStyle=coat;ctx.beginPath();ctx.moveTo(-9,-64);ctx.lineTo(9,-64);ctx.lineTo(12,-24);ctx.lineTo(-15,-20);ctx.closePath();ctx.fill();
+  if(!ghost){ctx.strokeStyle=o.accent;ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(0,-64);for(let i=1;i<=5;i++)ctx.lineTo(-i*7,-64-i*1.2+Math.sin(SC.t*5-i)*2*i/5);ctx.stroke()}
+  if(o.hair){ctx.fillStyle=ghost||o.hair;ctx.beginPath();ctx.ellipse(-5,-73,10,12,.2,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(-12,-74);ctx.quadraticCurveTo(-16,-60,-10,-50);ctx.lineTo(-4,-62);ctx.fill()}
+  ctx.fillStyle=hood;ctx.beginPath();ctx.arc(1,-75,9.5,0,7);ctx.fill();
+  if(!ghost){
+    if(o.visor){ctx.fillStyle=o.accent;ctx.fillRect(2,-77,9,3)}
+    else{ctx.fillStyle=o.eyeRed?'#ff2e4f':o.accent;ctx.fillRect(4,-77,2.5,2.5);ctx.fillRect(8,-77,2.5,2.5)}
+  }else if(o.eyeRed){ctx.fillStyle='#ff2e4f';ctx.beginPath();ctx.moveTo(1,-78);ctx.lineTo(10,-76);ctx.lineTo(1,-74);ctx.closePath();ctx.fill()}
+  const a=o.armAng??1.35,hx=2+Math.cos(a)*27,hy=-58+Math.sin(a)*27;
+  seg({x:2,y:-58},{x:hx,y:hy},6,coat2);
+  ctx.restore();
+  return{x:x+f*hx,y:fy+hy};
+}
+function card(txt,a){
+  if(a<=0)return;
+  ctx.save();ctx.globalAlpha=a*.68;ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);ctx.globalAlpha=a;
+  const w=580,h=170,x=(W-w)/2,y=(H-h)/2;
+  ctx.fillStyle='#0d0a16';ctx.fillRect(x,y,w,h);
+  ctx.strokeStyle='#d8c9a3';ctx.lineWidth=2;ctx.strokeRect(x+8,y+8,w-16,h-16);ctx.lineWidth=1;ctx.strokeRect(x+15,y+15,w-30,h-30);
+  ctx.fillStyle='#d8c9a3';for(const[cx,cy]of[[x+8,y+8],[x+w-8,y+8],[x+8,y+h-8],[x+w-8,y+h-8]]){ctx.beginPath();ctx.moveTo(cx,cy-5);ctx.lineTo(cx+5,cy);ctx.lineTo(cx,cy+5);ctx.lineTo(cx-5,cy);ctx.closePath();ctx.fill()}
+  ctx.font="italic 500 46px 'Cormorant Garamond', Georgia, serif";ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#f3eadb';ctx.fillText(txt,W/2,H/2+2);
+  ctx.restore();
+}
+// part 2: the still place where Sol is
+const SOL_CARDS=[[3.8,5.8,'Sol?'],[6.8,8.9,'Wren…? You came.'],[12,13.7,'Take it. Come home.'],[16,17.7,'I can’t. It won’t let me go.'],[19.6,22.6,'Not yet.']];
+function sceneSol(t,rdt){
+  const FY=470,c=ctx;
+  c.setTransform(K,0,0,K,0,0);
+  const bg=c.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#07050f');bg.addColorStop(.7,'#1a0f2e');bg.addColorStop(1,'#0b0716');c.fillStyle=bg;c.fillRect(0,0,W,H);
+  // a huge stopped clock behind everything
+  c.strokeStyle='rgba(170,190,255,.12)';c.lineWidth=3;c.beginPath();c.arc(640,250,210,0,7);c.stroke();
+  for(let i=0;i<60;i++){const a=i/60*Math.PI*2,l=i%5?7:16;c.lineWidth=i%5?1:2.5;c.beginPath();c.moveTo(640+Math.cos(a)*205,250+Math.sin(a)*205);c.lineTo(640+Math.cos(a)*(205-l),250+Math.sin(a)*(205-l));c.stroke()}
+  c.lineWidth=6;c.beginPath();c.moveTo(640,250);c.lineTo(640+Math.cos(-1.75)*120,250+Math.sin(-1.75)*120);c.stroke();
+  c.lineWidth=3.5;c.beginPath();c.moveTo(640,250);c.lineTo(640+Math.cos(-1.62)*175,250+Math.sin(-1.62)*175);c.stroke();
+  for(const m of SC.motes){m.y-=m.v*rdt;if(m.y<0)m.y=470;c.fillStyle=`rgba(190,210,255,${.25+.25*Math.sin(SC.t+m.x)})`;c.fillRect(m.x,m.y,m.s,m.s)}
+  const fl=c.createLinearGradient(0,FY,0,H);fl.addColorStop(0,'rgba(120,150,255,.16)');fl.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=fl;c.fillRect(0,FY,W,H-FY);
+  c.strokeStyle='rgba(150,200,255,.45)';c.lineWidth=1.5;c.beginPath();c.moveTo(0,FY);c.lineTo(W,FY);c.stroke();
+  // the characters are drawn through a closer camera, anchored on the floor at screen centre
+  const Z=1.6,ZT=()=>c.setTransform(K*Z,0,0,K*Z,K*640*(1-Z),K*FY*(1-Z));ZT();
+  // Wren walks in, stops, later steps closer and holds out the anchor
+  const wx=t<.6?140:t<3.6?140+380*ease(span(t,.6,3.6)):t<10.6?520:520+80*ease(span(t,10.6,11.6));
+  const walking=(t>.6&&t<3.6)||(t>10.6&&t<11.6);
+  const armW=1.35+(-0.1-1.35)*ease(span(t,11.6,12));
+  // Sol: back turned, then she turns. Her unbound half (her back) flickers, then floods her when the anchor fails.
+  const turn=span(t,6,6.5),solSx=turn<.5?1-turn*2:-(turn-.5)*2;
+  const u=t<15?.36+.05*Math.sin(SC.t*7):.36+.64*ease(span(t,15,16.8));
+  const armS=1.35+(-0.2-1.35)*ease(span(t,13.8,15))*(t<15.4?1:1-ease(span(t,15.4,15.9)));
+  if(t>15)once('fail',()=>{tone(200,.9,.08,'sawtooth',90);noise(.5,1200,.12,'bandpass')});
+  if(t>15.6)once('surge',()=>{noise(1.6,250,.35);tone(60,1.6,.16,'sawtooth',35)});
+  if(t>6)once('turn',()=>tone(196,1.4,.05,'sine',185));
+  const sol={facing:-1,sx:solSx,coat:'#3a3f5c',coat2:'#4a5070',hood:'#2a2f44',accent:'#ff8f70',hair:'#2a2236',armAng:armS};
+  const shake=t>15.6&&t<18.4&&!RM?rand(-2,2)*u:0;
+  drawFig(840+shake,FY,sol);
+  // the unbound half: echo plating over her back, spreading as u rises
+  // clip to her back side (local -x, hair and scarf included), widening toward her front as u→1
+  c.save();c.translate(840+shake,FY);c.scale(solSx||.001,1);c.beginPath();c.rect(-42,-112,26+29*u+(u>.95?6:0),114);c.clip();ZT();
+  for(const[dx,col]of[[-2.5,'rgba(255,79,154,.55)'],[2.5,'rgba(94,242,255,.55)'],[rand(-1.5,1.5),'#ece6ff']])drawFig(840+shake+dx,FY,{...sol,ghost:col,eyeRed:u>.8});
+  c.restore();
+  // Sync hovers behind Wren carrying the anchor; the anchor floats to Wren's hand, then fails
+  const sy=FY-128+Math.sin(SC.t*2.2)*4;
+  if(!SC.wrenGone){
+    const hand=drawFig(wx,FY,{facing:1,walk:walking?SC.t*8:null,coat:'#232a3f',coat2:'#3a4566',hood:'#1a2030',accent:'#ffb347',visor:true,armAng:armW});
+    drawSyncAt(wx-34,sy);
+    const toHand=ease(span(t,9.4,10.6)),ax=(wx-34)+(hand.x-(wx-34))*toHand,ay=(sy-40)+(hand.y-6-(sy-40))*toHand;
+    const dim=ease(span(t,15,15.6)),fl=t>14.9&&t<15.6?(Math.random()<.5?1:.4):1;
+    if(t<18.3)drawAnchor(ax,ay,.7*fl,dim);
+  }else drawSyncAt(wx-34,sy+ease(span(t,18.3,19.5))*60);
+  // the strike: a white tentacle-arm lashes from Sol through Wren
+  if(t>17.9&&t<19){
+    const p=ease(span(t,17.9,18.25)),back=1-ease(span(t,18.6,19)),x0=828,y0=FY-58,x1=wx+4,y1=FY-56,L=p*back;
+    c.lineCap='round';
+    for(const[wd,col]of[[12,'rgba(255,79,154,.35)'],[6,'#ece6ff']]){c.strokeStyle=col;c.lineWidth=wd;c.beginPath();
+      for(let i=0;i<=16;i++){const k=i/16*L,x=x0+(x1-x0)*k,y=y0+(y1-y0)*k+Math.sin(k*9+SC.t*20)*10*(1-k);i?c.lineTo(x,y):c.moveTo(x,y)}c.stroke()}
+    once('lash',()=>{noise(.3,3000,.3,'highpass');tone(1200,.2,.08,'sawtooth',200)});
+  }
+  if(t>=18.25)once('hit',()=>{SC.wrenGone=true;for(let i=0;i<46;i++)SC.parts.push({x:wx+rand(-10,10),y:FY-rand(5,85),vx:rand(-320,120),vy:rand(-360,-60),a:rand(0,6),va:rand(-12,12),size:rand(4,10),life:rand(1,1.8),col:pick(['#232a3f','#3a4566','#ffb347','#ffb347','#1a2030'])});noise(.9,1800,.3);tone(420,.9,.18,'sawtooth',50)});
+  for(const p of SC.parts){c.save();c.globalAlpha=Math.min(1,p.life);c.translate(p.x,p.y);c.rotate(p.a);c.fillStyle=p.col;c.beginPath();c.moveTo(-p.size/2,p.size/3);c.lineTo(p.size/2,p.size/2);c.lineTo(0,-p.size/2);c.closePath();c.fill();c.restore()}
+  c.setTransform(K,0,0,K,0,0);
+  if(t>18.25&&t<18.6){c.fillStyle=`rgba(255,255,255,${.8*(1-span(t,18.25,18.6))})`;c.fillRect(0,0,W,H)}
+  if(t<.6){c.fillStyle=`rgba(230,242,255,${1-t/.6})`;c.fillRect(0,0,W,H)}
+  for(const[a,b,txt]of SOL_CARDS)if(t>a&&t<b)card(txt,Math.min(1,(t-a)/.35,(b-t)/.35));
+  if(t>22.6){c.fillStyle=`rgba(0,0,0,${span(t,22.6,23.4)})`;c.fillRect(0,0,W,H)}
+}
+function drawSyncAt(x,y){
+  const c=ctx;c.save();c.translate(x,y);
+  c.fillStyle='rgba(94,242,255,.16)';c.beginPath();c.arc(0,0,15,0,7);c.fill();
+  for(let i=0;i<4;i++){c.save();c.rotate((SC?SC.t:0)+i*Math.PI/2);c.translate(1.5,0);c.fillStyle=i%2?'#d9dcef':'#eef0fb';c.beginPath();c.moveTo(2,-7);c.lineTo(11,0);c.lineTo(2,7);c.closePath();c.fill();c.restore()}
+  c.fillStyle='#16233a';c.beginPath();c.arc(0,0,5.5,0,7);c.fill();c.fillStyle='#5ef2ff';c.beginPath();c.arc(1,0,3,0,7);c.fill();
+  c.restore();
+}
+
 // ---------- update ----------
 function update(dt){
   const playing=G.state==='play';
@@ -804,7 +1020,10 @@ function update(dt){
       if(!RM)G.shake=Math.max(G.shake,1+2.5*hf);
       G.rumT=(G.rumT||0)-dt;if(G.rumT<=0){G.rumT=.7;noise(.8,160+120*hf,.12+.12*hf);tone(48,.8,.06+.05*hf,'sawtooth',38)}
       if(Math.random()<dt*30){const cy=ground(PORTAL)-92;G.parts.push({x:PORTAL+rand(-6,6),y:cy+rand(-60,60),vx:rand(-60,60),vy:rand(-80,20),life:rand(.3,.6),size:rand(2,3.5),col:pick(['#ffd36b','#ffb347','#fff2c4'])})}
-      if(G.hold>=lv('rift')){
+      if(G.hold>=lv('rift')&&G.boss){
+        // boss rifts end in a cutscene: the first time, the anchor opens a way to Sol; after that Wren refuses it
+        startScene((save.storyAnchors||0)<G.n/5?'sol':'refuse');
+      }else if(G.hold>=lv('rift')){
         G.opened=true;G.state='ending';G.endT=1.6;G.openT=0;G.flashW=RM?0:.9;sfx.rift();G.shake=RM?0:16;
         noise(1.2,900,.5);tone(110,1,.25,'sawtooth',30);
         {const cy=ground(PORTAL)-92,P=[];for(let i=0;i<16;i++)P.push({x:PORTAL+rand(-10,10),y:cy+rand(-90,90)});shatter(P,['#fff4cf','#ffd36b','#ffb347','#1a0b22'],0,-200,60)}
@@ -826,11 +1045,12 @@ function update(dt){
         const d=e.type==='wraith'?Math.hypot(e.x-G.px,e.y-cy):e.x-G.px;
         if(d<SPEAR_RANGE&&d<bd){bd=d;tgt=e}
       }
-      if(!tgt&&G.boss)for(const p of G.boss.proj)if(Math.hypot(p.x-G.px,p.y-cy)<SPEAR_RANGE){G.spear--;G.spearCd=.3;G.jabs.push({x1:G.px+8,y1:cy-4,x2:p.x,y2:p.y,t:.14});popProj(p);break}
+      if(!tgt&&G.boss)for(const p of G.boss.proj)if(Math.hypot(p.x-G.px,p.y-cy)<SPEAR_RANGE){spearStrike(p.x,p.y);break}
       if(tgt)jab(tgt);
     }
   }
   for(const j of G.jabs)j.t-=dt;G.jabs=G.jabs.filter(j=>j.t>0);
+  G.lunge=Math.max(0,(G.lunge||0)-dt);
   G.camX+=(G.px-PSX-G.camX)*Math.min(1,dt*9);
   for(const t of G.trail)t.t-=dt;G.trail=G.trail.filter(t=>t.t>0);
   // Sync: at the rift while it opens; otherwise guards the nearest stasis crack ahead of Wren, else stays at his shoulder
@@ -893,7 +1113,7 @@ function update(dt){
     if(G.mT<=0&&(G.es.some(e=>!e.dead&&e.state==='walk'&&e.x<G.camX+W)||bossOnScreen())){
       const bu=GUNS.bolt.ups;G.mT=bu.rate.vals[save.guns.bolt.rate];G.mFlash=.06;
       const mz={x:m.x+Math.cos(G.mAim)*12,y:m.y+Math.sin(G.mAim)*12};
-      G.bolts.push({x:mz.x,y:mz.y,vx:Math.cos(G.mAim)*1400,vy:Math.sin(G.mAim)*1400,life:1.1,arc:false,sync:true,dmg:bu.power.vals[save.guns.bolt.power]});
+      G.bolts.push({x:mz.x,y:mz.y,vx:Math.cos(G.mAim)*1400,vy:Math.sin(G.mAim)*1400,life:1.1,arc:false,sync:true,rad:boltRad(),dmg:bu.power.vals[save.guns.bolt.power]});
       tone(1100,.06,.04,'triangle',300);
     }
   }
@@ -1064,6 +1284,41 @@ function drawHoldFx(){
   if(e<1){ctx.globalAlpha=fade*(1-e);text('The Unbound is fighting back. Sync needs time to open the rift.',640,y+30,17,'#f3eefe')}
   ctx.globalAlpha=1;
 }
+// the spear strike, drawn along the thrust. Phases: charge orb → snap out → hold → the wake tears apart and fades.
+function drawSpear(j){
+  const el=JAB_T-j.t,L=Math.hypot(j.x2-j.x1,j.y2-j.y1);
+  const ext=el<.05?0:el<.12?1-Math.pow(1-(el-.05)/.07,3):1,diss=clamp((el-.22)/(JAB_T-.22),0,1),fade=1-diss;
+  ctx.save();ctx.translate(j.x1,j.y1);ctx.rotate(j.ang);
+  // charge orb at the hand
+  if(el<.12){const r=8+40*Math.min(1,el/.05)*(1-Math.max(0,(el-.05)/.07)),g=ctx.createRadialGradient(0,0,1,0,0,r);
+    g.addColorStop(0,'rgba(255,255,255,.95)');g.addColorStop(.4,'rgba(255,179,71,.85)');g.addColorStop(1,'rgba(255,120,40,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,r,0,7);ctx.fill()}
+  if(ext>0){
+    const X=L*ext,lift=1+.35*diss,back=-26*diss;
+    ctx.globalAlpha=fade;ctx.translate(back,0);
+    // swirl arcs around Wren
+    for(let i=0;i<2;i++){ctx.strokeStyle=`rgba(255,200,120,${.7-.3*i})`;ctx.lineWidth=3-i;ctx.beginPath();ctx.ellipse(-4,0,46+i*14,30+i*10,0,-2.6+el*6,.4+el*6);ctx.stroke()}
+    // the beast-shaped wake: a crested back, a jaw of jagged teeth underneath, a pointed snout at the tip
+    const top=[[0,-12],[.3,-48],[.55,-44],[.78,-26],[.94,-8],[1,0]],tt=j.teeth;
+    const bot=[[1,0],[.9,12]];for(let i=0;i<6;i++){const x=.86-i*.09;bot.push([x,(i%2?14:36)*tt[i]])}bot.push([.3,26],[.12,30],[0,14]);
+    const path=(sx,sy)=>{ctx.beginPath();top.forEach(([u,v],i)=>{const p=[u*X,v*lift*sy];i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])});bot.forEach(([u,v])=>ctx.lineTo(u*X,v*lift*sy));ctx.closePath()};
+    const gw=ctx.createLinearGradient(0,0,X,0);gw.addColorStop(0,'rgba(200,70,20,.0)');gw.addColorStop(.25,'rgba(220,100,30,.75)');gw.addColorStop(.7,'rgba(255,179,71,.92)');gw.addColorStop(1,'rgba(255,250,235,1)');
+    ctx.shadowColor='rgba(255,160,60,.8)';ctx.shadowBlur=RM?0:18;
+    path(1,1);ctx.fillStyle=gw;ctx.fill();ctx.shadowBlur=0;
+    path(.6,.55);ctx.fillStyle='rgba(255,242,196,.35)';ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=1.5;ctx.beginPath();top.forEach(([u,v],i)=>{i?ctx.lineTo(u*X,v*lift):ctx.moveTo(u*X,v*lift)});ctx.stroke();
+    // its eye
+    ctx.fillStyle='#ffffff';ctx.beginPath();ctx.moveTo(X*.8,-14*lift);ctx.lineTo(X*.88,-10*lift);ctx.lineTo(X*.8,-8*lift);ctx.closePath();ctx.fill();
+    // speed slivers trailing back
+    ctx.strokeStyle='rgba(255,230,190,.6)';ctx.lineWidth=1.2;
+    for(let i=0;i<5;i++){const y=rand(-40,30)*lift,x0=rand(.2,.7)*X;ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x0-rand(30,70),y);ctx.stroke()}
+    // the spear itself: dark shaft, bright tip
+    ctx.globalAlpha=1-Math.max(0,diss*1.4-.4);
+    ctx.strokeStyle='#141a2e';ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-18,0);ctx.lineTo(X+4,0);ctx.stroke();
+    ctx.fillStyle='#ffffff';ctx.beginPath();ctx.moveTo(X+22,0);ctx.lineTo(X+2,-7);ctx.lineTo(X+6,0);ctx.lineTo(X+2,7);ctx.closePath();ctx.fill();
+    const tg=ctx.createRadialGradient(X+12,0,1,X+12,0,22);tg.addColorStop(0,'rgba(255,255,255,.9)');tg.addColorStop(1,'rgba(255,179,71,0)');ctx.fillStyle=tg;ctx.beginPath();ctx.arc(X+12,0,22,0,7);ctx.fill();
+  }
+  ctx.restore();
+}
 // little crackles of electricity on a stunned echo
 function stunSparks(c,s){
   ctx.strokeStyle='rgba(200,235,255,.9)';ctx.lineWidth=1.3;ctx.lineJoin='miter';
@@ -1136,6 +1391,7 @@ function drawPlayer(){
   ctx.save();
   if(G.inv>0&&Math.floor(G.time*12)%2)ctx.globalAlpha=.45;
   if(G.pfade>0){ctx.globalAlpha=1-G.pfade;ctx.translate(x,fy-40);ctx.scale(1-G.pfade*.6,1+G.pfade*.3);ctx.translate(-x,-(fy-40))}
+  if(G.lunge>0)ctx.translate(Math.sin((1-G.lunge/.22)*Math.PI)*12,0);
   const wp=(G.L-G.px)*.09,hip={x:x,y:fy-32};
   for(const side of[1,-1]){
     const a=Math.sin(wp+(side>0?0:Math.PI))*.42,knee={x:hip.x+Math.sin(a)*16,y:hip.y+Math.cos(a)*16};
@@ -1148,9 +1404,11 @@ function drawPlayer(){
   ctx.fillStyle=coat2;ctx.fillRect(x-1,fy-62,2,36);
   ctx.strokeStyle='#ffb347';ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x,fy-64);
   for(let i=1;i<=5;i++)ctx.lineTo(x+i*7,fy-64-i*1.5+Math.sin(G.time*9-i)*3*i/5);ctx.stroke();
+  ctx.save();ctx.translate(G.headShake||0,0);
   ctx.fillStyle=hood;ctx.beginPath();ctx.arc(x+1,fy-75,9.5,0,7);ctx.fill();
   ctx.fillStyle='#ffb347';ctx.fillRect(x+2,fy-77,9,3);
   ctx.fillStyle='rgba(255,179,71,.35)';ctx.fillRect(x+2,fy-79,11,7);
+  ctx.restore();
   if(G.oc>0){
     const a=Math.min(1,G.oc)*.22;
     const g=ctx.createRadialGradient(x+2,fy-46,4,x+2,fy-46,48);g.addColorStop(0,`rgba(255,179,71,${a})`);g.addColorStop(1,'rgba(255,179,71,0)');
@@ -1210,19 +1468,20 @@ function drawSync(){
   ctx.restore();
 }
 function crackPts(){if(!G.cpts)G.cpts=Array.from({length:11},()=>rand(-1,1));return G.cpts}
-function drawCrack(){
+// crack / rift colour: gold normally, shifting to blue as G.blue goes 0→1 (the anchor's colour)
+function tc(r,g,b,a){const k=G.blue||0,br=Math.round(r+(Math.max(60,r*.35)-r)*k),bg=Math.round(g+(Math.min(255,g*.95+40)-g)*k),bb=Math.round(b+(255-b)*k);return `rgba(${br},${bg},${bb},${a})`}function drawCrack(){
   const sx=PORTAL,cy=ground(PORTAL)-92;
   if(sx-G.camX<-120||sx-G.camX>W+120)return;
   const f=G.holding?Math.min(1,G.hold/lv('rift')):0,h=70+30*f,w=2+16*f;
   crackPts();
   ctx.save();ctx.translate(sx,cy);
-  const glow=ctx.createRadialGradient(0,0,2,0,0,60+40*f);glow.addColorStop(0,`rgba(255,211,107,${.25+.4*f})`);glow.addColorStop(1,'rgba(255,211,107,0)');
+  const glow=ctx.createRadialGradient(0,0,2,0,0,60+40*f);glow.addColorStop(0,tc(255,211,107,.25+.4*f));glow.addColorStop(1,tc(255,211,107,0));
   ctx.fillStyle=glow;ctx.save();ctx.scale(.5,1);ctx.beginPath();ctx.arc(0,0,60+40*f,0,7);ctx.fill();ctx.restore();
   const left=[],right=[];
   G.cpts.forEach((o,i)=>{const y=-h+i*(2*h/10),taper=Math.sin(i/10*Math.PI),x=o*6;left.push({x:x-w*taper,y});right.push({x:x+w*taper,y})});
-  ctx.fillStyle=f>0?'#fff4cf':'rgba(255,224,150,.8)';ctx.beginPath();left.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));for(let i=right.length-1;i>=0;i--)ctx.lineTo(right[i].x,right[i].y);ctx.closePath();ctx.fill();
-  ctx.strokeStyle='#ffb347';ctx.lineWidth=2;ctx.beginPath();G.cpts.forEach((o,i)=>{const y=-h+i*(2*h/10);i?ctx.lineTo(o*6,y):ctx.moveTo(o*6,y)});ctx.stroke();
-  if(G.holding){ctx.strokeStyle='rgba(255,211,107,.9)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,-h-22,9,-Math.PI/2,-Math.PI/2+f*Math.PI*2);ctx.stroke()}
+  ctx.fillStyle=f>0?tc(255,244,207,1):tc(255,224,150,.8);ctx.beginPath();left.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));for(let i=right.length-1;i>=0;i--)ctx.lineTo(right[i].x,right[i].y);ctx.closePath();ctx.fill();
+  ctx.strokeStyle=tc(255,179,71,1);ctx.lineWidth=2;ctx.beginPath();G.cpts.forEach((o,i)=>{const y=-h+i*(2*h/10);i?ctx.lineTo(o*6,y):ctx.moveTo(o*6,y)});ctx.stroke();
+  if(G.holding&&!SC){ctx.strokeStyle='rgba(255,211,107,.9)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,-h-22,9,-Math.PI/2,-Math.PI/2+f*Math.PI*2);ctx.stroke()}
   ctx.restore();
 }
 // once Sync breaks through, the same jagged crack is torn wide open: a ragged gash onto a black void, rim trembling
@@ -1232,7 +1491,7 @@ function drawPortal(){
   if(sx-G.camX<-160||sx-G.camX>W+160)return;
   const t=clamp((G.openT||0)/.3,0,1),k=1-Math.pow(1-t,3),h=100+110*k,w=18+64*k,jit=RM?0:3+5*k;
   ctx.save();ctx.translate(sx,cy);
-  const glow=ctx.createRadialGradient(0,0,10,0,0,150);glow.addColorStop(0,'rgba(255,211,107,.55)');glow.addColorStop(1,'rgba(255,211,107,0)');
+  const glow=ctx.createRadialGradient(0,0,10,0,0,150);glow.addColorStop(0,tc(255,211,107,.55));glow.addColorStop(1,tc(255,211,107,0));
   ctx.fillStyle=glow;ctx.save();ctx.scale(.6,1);ctx.beginPath();ctx.arc(0,0,150,0,7);ctx.fill();ctx.restore();
   crackPts();
   if(!G.rpts){G.rpts=[];for(let i=0;i<=22;i++)G.rpts.push([rand(-1,1),rand(.45,1),rand(.45,1)])}
@@ -1241,13 +1500,13 @@ function drawPortal(){
   G.rpts.forEach(([o,bl,br],i)=>{const y=-h+i*(2*h/n),taper=Math.pow(Math.sin(i/n*Math.PI),.55),x=o*14*k+G.cpts[Math.round(i/n*(G.cpts.length-1))]*6;
     L.push({x:x-w*taper*(i%2?bl:1)-rand(0,jit),y:y+rand(-jit,jit)});R.push({x:x+w*taper*(i%2?1:br)+rand(0,jit),y:y+rand(-jit,jit)})});
   const path=()=>{ctx.beginPath();L.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));for(let i=R.length-1;i>=0;i--)ctx.lineTo(R[i].x,R[i].y);ctx.closePath()};
-  path();ctx.strokeStyle='rgba(255,211,107,.35)';ctx.lineWidth=16;ctx.lineJoin='miter';ctx.stroke();
-  path();ctx.strokeStyle='#ffd36b';ctx.lineWidth=6;ctx.stroke();
+  path();ctx.strokeStyle=tc(255,211,107,.35);ctx.lineWidth=16;ctx.lineJoin='miter';ctx.stroke();
+  path();ctx.strokeStyle=tc(255,211,107,1);ctx.lineWidth=6;ctx.stroke();
   path();const v=ctx.createRadialGradient(0,0,4,0,0,w+10);v.addColorStop(0,'#000000');v.addColorStop(.6,'#0e0414');v.addColorStop(1,'#2c0d24');ctx.fillStyle=v;ctx.fill();
-  path();ctx.strokeStyle='#fff4cf';ctx.lineWidth=2;ctx.stroke();
-  ctx.strokeStyle='rgba(255,236,180,.8)';ctx.lineWidth=1.5;
+  path();ctx.strokeStyle=tc(255,244,207,1);ctx.lineWidth=2;ctx.stroke();
+  ctx.strokeStyle=tc(255,236,180,.8);ctx.lineWidth=1.5;
   for(const side of[L,R])for(let i=1;i<side.length-1;i+=2){const p=side[i],d=side===L?-1:1,len=rand(10,26)*k;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x+d*len,p.y+rand(-10,10));ctx.stroke()}
-  for(let i=0;i<6;i++){ctx.fillStyle='rgba(255,244,207,.8)';ctx.fillRect(rand(-w*.6,w*.6),rand(-h*.7,h*.7),2,2)}
+  for(let i=0;i<6;i++){ctx.fillStyle=tc(255,244,207,.8);ctx.fillRect(rand(-w*.6,w*.6),rand(-h*.7,h*.7),2,2)}
   ctx.restore();
 }
 function text(t,x,y,size,col,al){
@@ -1332,17 +1591,14 @@ function render(){
       for(const[w,c]of[[6,`rgba(127,212,255,${.35*k})`],[2,`rgba(234,247,255,${k})`]]){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.lineJoin='round';ctx.beginPath();j.z.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke()}
       continue;
     }
-    seg({x:j.x1,y:j.y1},{x:j.x2,y:j.y2},4,`rgba(255,179,71,${.35*k})`);
-    seg({x:j.x1,y:j.y1},{x:j.x2,y:j.y2},2,`rgba(255,242,196,${k})`);
-    ctx.save();ctx.translate(j.x2,j.y2);ctx.rotate(a);ctx.globalAlpha=k;ctx.fillStyle='#fff2c4';
-    ctx.beginPath();ctx.moveTo(6,0);ctx.lineTo(-6,-5);ctx.lineTo(-3,0);ctx.lineTo(-6,5);ctx.closePath();ctx.fill();ctx.restore();
+    if(j.c==='spear'){drawSpear(j);continue}
   }
   for(const b of G.bolts){
     if(b.arc){const t={x:b.x-b.vx*.025,y:b.y-b.vy*.025},z=zigzag(t,b);
       ctx.lineCap='round';ctx.lineJoin='round';
       for(const[w,c]of[[5,'rgba(94,242,255,.35)'],[1.6,'#e6fdff']]){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();z.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke()}}
     else if(b.sync){seg({x:b.x-b.vx*.02,y:b.y-b.vy*.02},b,4,'rgba(94,242,255,.6)');seg({x:b.x-b.vx*.012,y:b.y-b.vy*.012},b,1.6,'#e6fdff')}
-    else{seg({x:b.x-b.vx*.02,y:b.y-b.vy*.02},b,4,'rgba(255,179,71,.6)');seg({x:b.x-b.vx*.012,y:b.y-b.vy*.012},b,1.6,'#fff6e0')}
+    else{const R=b.rad||0;seg({x:b.x-b.vx*.02,y:b.y-b.vy*.02},b,4+R*1.6,'rgba(255,179,71,.6)');seg({x:b.x-b.vx*.012,y:b.y-b.vy*.012},b,1.6+R*.5,'#fff6e0')}
   }
   // lightning: re-jagged every frame so it crackles, with a thick glow, a white-hot core and short forks
   for(const a of G.arcs){
@@ -1389,7 +1645,7 @@ function render(){
     ctx.globalAlpha=1;
   }
   if(G.banner){ctx.globalAlpha=Math.min(1,G.banner.t,2.2-G.banner.t+.2);text(G.banner.txt,640,G.holding?172:150,30,'#ff4f9a');ctx.globalAlpha=1}
-  if(G.holding&&!G.opened)drawHoldFx();
+  if(G.holding&&!G.opened&&!SC)drawHoldFx();
   if(G.bossCard)drawBossCard();
   if(G.lull>0){const a=Math.min(1,G.lull/.4,(G.lullMax-G.lull)/.3)*.22;ctx.fillStyle=`rgba(120,140,255,${a})`;ctx.fillRect(0,0,W,H)}
   if(G.flashW>0){ctx.fillStyle=`rgba(255,244,214,${G.flashW})`;ctx.fillRect(0,0,W,H)}
@@ -1408,9 +1664,12 @@ function hud(){
   setText(dN,'dn',cd>0?String(Math.ceil(cd)):'');
   if(G.state!=='play'&&!dEl.hidden&&G.state!=='shop')dEl.hidden=true;
   const sp=$('#spearPips'),show=save.kit.spear&&!dEl.hidden;sp.hidden=!show;
-  if(show){const max=lv('spear'),key=G.spear+'/'+max+'/'+Math.floor(G.spearT*10);
-    if(last.sp!==key){last.sp=key;sp.innerHTML=Array.from({length:max},(_,i)=>i<G.spear?'<i class="on"></i>':i===G.spear?`<i><b style="width:${(G.spearT/SPEAR_REFILL*100).toFixed(0)}%"></b></i>`:'<i></i>').join('')}}
-  const hf=G.holding?Math.min(1,G.hold/lv('rift')):0;
+  if(show){
+    const max=lv('spear'),full=G.spear>=max,left=SPEAR_REFILL-G.spearT;
+    sp.style.setProperty('--p',full?'1':(G.spearT/SPEAR_REFILL).toFixed(3));sp.classList.toggle('empty',G.spear<=0);
+    const key=G.spear+'/'+(G.spear<=0?Math.ceil(left):'');
+    if(last.sp!==key){last.sp=key;sp.innerHTML=SPEAR_SVG+(G.spear<=0?`<span class="cd">${Math.ceil(left)}</span>`:'')+`<span class="ch">${G.spear}</span>`}
+  }  const hf=G.holding?Math.min(1,G.hold/lv('rift')):0;
   hudEls.done.style.width=((G.holding?hf:progress())*100).toFixed(1)+'%';
   hudEls.done.classList.toggle('gold',G.holding);
   setText(hudEls.m,'m',G.holding?(G.opened?'Rift open':`Sync is opening the rift · ${Math.round(hf*100)}%`):fmtDays(daysLeft(G.px)));
@@ -1502,8 +1761,7 @@ function renderShop(){
       return `<div class="gcard${eq?' eq':''}">${GUNART[k](d.col)}<b>${d.name}</b><p>${d.blurb}</p><span class="stats">${own?gunStats(k):(d.start?'Starts at power and fire rate level '+d.start+', with 2 chain jumps.':'Upgrades start from zero once unlocked.')}</span>${btn}</div>`;
     }).join('')+'</div>';
   }else if(shopTab==='px'){
-    const gain=save.level-1,armed=Date.now()-resetArm<4000;
-    h=`<div class="reset"><div><b>Start over · +${gain} paradox</b><span>${gain?`Back to rift 1. Anomalies, sparks, upgrades, weapons, gear, Sync upgrades and consumables are wiped. Paradox perks stay. Best ever: rift ${Math.max(save.best,gain)}.`:'Clear at least one rift this cycle to earn paradox from starting over.'}</span></div><button class="buy red${armed?' armed':''}" type="button" data-act="reset" ${gain?'':'disabled'}>${armed?'Tap to confirm':'Start over'}</button></div>`;
+    h=`<div class="reset solo"><div><b>Paradox</b><span>Earned when Sol throws Wren back to the beginning: 1 for every rift cleared that cycle. Perks bought here last through every cycle. Best ever: rift ${save.best}${save.cycles?` · cycles: ${save.cycles}`:''}.</span></div></div>`;
     h+=Object.entries(PERKS).map(([k,d])=>{
       const lv=save.perk[k],cost=d.cost[lv],v=d.vals;
       const btn=cost===undefined?`<button class="buy ghost" type="button" disabled>Maxed</button>`
@@ -1570,7 +1828,7 @@ function showClear(){
     const ch=G.n/5,first=(save.storyAnchors||0)<ch;if(first)save.storyAnchors=ch;persist();
     showMsg(`Chapter ${ch} complete`,first?'An anchor':'Through the rift',
       `<div>Echoes shattered<b>${G.kills}</b></div><div>Anomalies collected<b>+${G.earned}</b></div><div class="ancrow">Sparks earned<b>+${anc}</b></div>`+
-      (first?`<p>As the Hollow Hour comes apart, Sync pulls something out of the wreckage: an anchor, the first thing in the Unbound that feels solid. It hums when Wren holds it.</p>`:`<p>You already carry this chapter's anchor.</p>`),
+      (first?`<p>As the Hollow Hour comes apart, Sync pulls something out of the wreckage: an anchor, the first thing in the Unbound that feels solid. It hums when Wren holds it.</p>`:`<p>Wren won't spend the anchor yet. Sync tucks it away and tears a new way forward.</p>`),
       'Next rift',()=>{buildLevel(save.level);enterShop()},false);
     return;
   }
@@ -1629,6 +1887,7 @@ enterShop();
 let lastT=performance.now(),acc=0;
 function frame(now){
   const rdt=Math.min(.05,(now-lastT)/1000);lastT=now;
+  if(SC){SC.t+=rdt;if(SC.t>=SC.len)endScene();else renderScene(rdt);requestAnimationFrame(frame);return}
   const ts=G.slow>0?.3:1;G.slow=Math.max(0,G.slow-rdt);
   acc+=rdt*ts;let n=0;
   while(acc>=DT&&n<5){update(DT);acc-=DT;n++}

@@ -18,7 +18,7 @@ Progress saves to the browser's local storage.
 |---|---|---|
 | Anomalies | Kills and distance reached | Gun upgrades, Sight, Anomaly Collector, Spear charges, consumables |
 | Sparks | Clearing a rift | Weapons, gear and Sync upgrades |
-| Paradox | Starting over (1 per rift cleared that cycle) | Permanent perks |
+| Paradox | Sol throwing Wren back after the rift 5 boss (1 per rift cleared that cycle) | Permanent perks |
 
 At the end of each rift, Wren stops at a golden crack and holds the line while his companion Sync pries it open.
 
