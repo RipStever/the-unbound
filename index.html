@@ -507,7 +507,6 @@ function kill(e,vx,vy,crit){
   shatter(e.P,[e.body,e.glow,'#5ef2ff','#ff4f9a'],vx,vy,e.type==='hulk'?30:e.type==='mite'?8:18);
   const tot=Math.max(1,Math.round(e.coin*(crit?1.5:1)*salv())),pieces=Math.min(tot,6);
   for(let i=0;i<pieces;i++){const v=Math.floor(tot/pieces)+(i<tot%pieces?1:0);G.pickups.push({x:e.P[2].x,y:e.P[2].y-10,vx:rand(-120,120),vy:rand(-320,-160),v,t:0})}
-  if(crit)G.floats.push({x:e.P[0].x,y:e.P[0].y-20,txt:'CRIT',t:.8,col:'#ffb347'});
   if(e.type==='splitter'){
     for(let i=0;i<2;i++){const m=mkEnemy('mite',e.x+(i?26:-14),'walk');m.frozen=e.frozen;m.flash=.15;G.es.push(m)}
     const c=e.P[2];G.rings.push({x:c.x,y:c.y-10,t:0,R:60,c:'255,79,154'});
@@ -576,6 +575,7 @@ function damage(e,dmg,x,y,vx,vy,crit){
 }
 function boltHit(e,part,b){
   const crit=part==='head';
+  if(crit)G.floats.push({x:e.P[0].x,y:e.P[0].y-20,txt:'CRIT',t:.8,col:'#ffb347'});
   damage(e,(b.dmg||gunStat('power'))*(crit?2.5:part==='leg'?.7:1),b.x,b.y,b.vx,b.vy,crit);
 }
 function zigzag(a,b){
