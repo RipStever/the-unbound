@@ -63,6 +63,17 @@ There's no full dodge-based combat, so bosses are built around what the player c
 
 The rewind step is the one active defensive move. **Each boss tells part of the story** of how Wren caused the break.
 
+### Chapter 1 boss: The Hollow Hour (rift 5) — built
+
+A hunched colossus of white echo-plating that crawls after Wren on long arms. Its head is a broken clock face with a single **amber** eye: Wren's colour. Its entrance card reads *"Something in here is wearing your colour."* That's the first hint that Wren caused this.
+
+- Crawls slightly faster than Wren walks; if it reaches him, he dies.
+- Three amber cores open and close. Hitting an open core damages it and knocks it back.
+- Throws dark crystal shards in arcs that have to be shot down (or jabbed by the spear).
+- Enrages during the hold: faster, more shards, cores stay closed for less time.
+- Killing it is optional; reaching the rift is the win. Killing it pays a burst of anomalies.
+- Clearing rift 5 ends chapter 1 and Sync recovers the first **anchor**. Sol's scene will hang off this moment.
+
 ## Mechanics in story terms
 
 | Mechanic | Story meaning | Status |
