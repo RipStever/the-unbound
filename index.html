@@ -201,7 +201,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
     <div id="shop" class="panel loadout" hidden>
       <div class="lh"><div><p class="eyebrow">Loadout</p><h1 id="shopT">Rift 1</h1><p id="shopSub" class="sub"></p></div><div id="wallet" class="wallet"></div></div>
       <div id="tip" class="tip" hidden role="status">
-        <p><b>Stuck on this rift?</b> Consumables like the Freeze grenade and Barrier can get you through a rough patch. They're used up, but they're cheap.</p>
+        <p><b>Stuck on this rift?</b> Consumables like the Freeze grenade and Barrier can get you through a rough patch. They are single use, but cheap! Make sure to stock up before your next Rewind.</p>
         <div class="tipbtns"><button type="button" class="buy" data-act="tipgo">Show me</button><button type="button" class="link" data-act="tipx">Got it</button></div>
       </div>
       <div id="seg" class="seg" role="tablist">
@@ -248,10 +248,10 @@ const GUNS={
     rate:{name:'Fire rate',vals:FIRE,cost:COST,fmt:v=>v.toFixed(2)+' s between shots'},
     size:{name:'Bolt size',vals:[0,2,4,6,8,10],cost:[20,50,110,220,400],fmt:v=>v?'+'+v+' bolt radius, edge hits on a head still crit':'Standard bolts'},
   }},
-  arc:{name:'Arc gun',unlock:5,start:3,col:'#5ef2ff',blurb:'Instant lightning that jumps between nearby echoes and stuns everything it hits. No headshot crits.',ups:{
+  arc:{name:'Arc gun',unlock:5,start:3,col:'#5ef2ff',blurb:'Instant lightning that jumps between nearby echoes and stuns everything it hits, but it cannot Crit.',ups:{
     power:{name:'Arc power',vals:[13,15,18,21,25,29,33,38,42,47,52,57,63,69,75],cost:COST,fmt:v=>v+' damage per strike'},
     rate:{name:'Fire rate',vals:ARCFIRE,cost:COST,fmt:v=>v.toFixed(2)+' s between shots'},
-    chain:{name:'Chain',vals:[2,3,4,5,6,7,8,9],cost:[30,80,180,350,600,950,1400],fmt:v=>v+' extra '+(v>1?'echoes':'echo')+' hit per shot'},
+    chain:{name:'Chain',vals:[2,3,4,5,6,7,8,9],cost:[30,80,180,350,600,950,1400],fmt:v=>'Up to '+v+' extra '+(v>1?'echoes':'echo')+' hit per shot'},
   }},
 };
 const GEN={
@@ -261,13 +261,13 @@ const GEN={
 // one-time items bought with sparks; tab says whether Wren wears it (gear) or Sync runs it (sync)
 const KIT={
   shield:{tab:'gear',name:'Phase shield',cost:3,blurb:'Takes one hit per run, then breaks in a stasis burst that freezes everything near you.'},
-  spear:{tab:'gear',name:'Spear',cost:4,blurb:'Wren jabs anything that gets close, automatically. Works on charges that refill one at a time.'},
-  boots:{tab:'gear',name:'Chrono boots',cost:5,blurb:'You walk back 15% faster, so you reach the rift sooner.'},
+  spear:{tab:'gear',name:'Spear',cost:4,blurb:'Wren automatically jabs anything that gets close. Works on charges that refill one at a time.'},
+  boots:{tab:'gear',name:'Chrono boots',cost:5,blurb:'Your walk speed is increased by 15%.'},
   after:{tab:'gear',name:'Afterimage',cost:4,blurb:'Each rewind step leaves a frozen copy of Wren behind. Ground echoes stall at it until they break it or it fades after 6 s.'},
-  mount:{tab:'sync',name:'Mounted weapon',cost:6,blurb:'Sync carries a bolt pistol and fires straight ahead on his own, using your Bolt pistol upgrades.'},
-  auto:{tab:'sync',name:'Auto-deployer',cost:4,blurb:'Sync uses one of your consumables for you, once per run, when the trigger you pick happens.'},
+  mount:{tab:'sync',name:'Mounted weapon',cost:6,blurb:'Sync carries a bolt pistol and fires on his own. Sync’s weapon uses your Bolt pistol upgrades.'},
+  auto:{tab:'sync',name:'Auto-deployer',cost:4,blurb:'Set a trigger for Sync to use one of your consumables automatically.'},
   capacitor:{tab:'sync',name:'Stasis capacitor',cost:3,blurb:'Every freeze lasts 50% longer: cores, grenades and the shield burst.'},
-  crit:{tab:'sync',name:'Crit sight',cost:2,blurb:'Sync marks each echo\'s critical point in amber so headshots are easy to see. Crits only land with the Bolt pistol.'},
+  crit:{tab:'sync',name:'Crit sight',cost:2,blurb:'Sync marks each echo\'s critical point in amber so weak spots are easy to see.'},
 };
 // levelled items; cur 'a' = anomalies, 's' = sparks. needs = the KIT item that must be owned first
 const LV={
@@ -277,14 +277,14 @@ const LV={
   rift:{name:'Rift breaker',vals:[8,6.8,5.6,4.5,3.5],cost:[2,3,5,8],cur:'s',fmt:v=>v.toFixed(1)+' s for Sync to open a rift'},
 };
 const lv=k=>LV[k].vals[save.lv[k]];
-const TRIG={hold:'Sync starts opening the rift',close:'an echo gets within 8 m',dive:'a wraith starts diving',surge:'a surge starts',half:'you pass halfway',shield:'your shield breaks'};
+const TRIG={hold:'Sync starts opening the rift',close:'an echo gets within 8 m',dive:'a wraith starts diving',surge:'a surge starts',shield:'your shield breaks'};
 const frz=()=>save.kit.capacitor?1.5:1;
 const CONS={
   grenade:{name:'Freeze grenade',cost:25,key:'1',blurb:'Lob it along your aim. Freezes every echo in the blast for 3 s.'},
-  wall:{name:'Barrier',cost:30,key:'2',blurb:'Drops a wall in front of you. Ground echoes stall at it until they break it down.'},
+  wall:{name:'Barrier',cost:30,key:'2',blurb:'Drops a wall in front of you. Ground echoes cannot pass until they break it down, but they can still phase through it.'},
   overclock:{name:'Overclock',cost:20,key:'3',blurb:'Doubles your fire rate for 8 s.'},
-  shock:{name:'Shockwave',cost:35,key:'4',blurb:'Shoves every ground echo on screen back and staggers them.'},
-  lull:{name:'Lull',cost:30,key:'5',blurb:'For 3 s, everything slows to a crawl and nothing new comes through. Made for holding the line.'},
+  shock:{name:'Shockwave',cost:35,key:'4',blurb:'Shoves every echo in range back and staggers them.'},
+  lull:{name:'Lull',cost:30,key:'5',blurb:'For 3 s, time slows to a crawl and no Echoes spawn during the duration.'},
 };
 const CONS_MAX=5;
 const PERKS={
@@ -302,7 +302,7 @@ function load(){
   const f=fresh();
   try{const s=JSON.parse(localStorage.getItem(SKEY));if(s&&s.guns&&s.level){
     for(const k in f.guns){s.guns[k]=Object.assign(f.guns[k],s.guns[k]);const st=GUNS[k].start||0;if(s.guns[k].owned){s.guns[k].power=Math.max(s.guns[k].power,st);s.guns[k].rate=Math.max(s.guns[k].rate,st)}}
-    s.gen=Object.assign(f.gen,s.gen);s.kit=Object.assign(f.kit,s.kit);s.cons=Object.assign(f.cons,s.cons);s.auto=Object.assign(f.auto,s.auto);s.perk=Object.assign(f.perk,s.perk);s.lv=Object.assign(f.lv,s.lv);if(!s.best)s.best=Math.max(0,(s.level||1)-1);if(!GUNS[s.gun])s.gun='bolt';
+    s.gen=Object.assign(f.gen,s.gen);s.kit=Object.assign(f.kit,s.kit);s.cons=Object.assign(f.cons,s.cons);s.auto=Object.assign(f.auto,s.auto);s.perk=Object.assign(f.perk,s.perk);s.lv=Object.assign(f.lv,s.lv);if(!s.best)s.best=Math.max(0,(s.level||1)-1);if(!GUNS[s.gun])s.gun='bolt';if(!TRIG[s.auto.trigger])s.auto.trigger='close';
     return Object.assign(f,s);
   }}catch(e){}
   try{const o=JSON.parse(localStorage.getItem('sdr-rift-v4'));if(o&&o.up&&o.level){
@@ -636,7 +636,7 @@ function useCons(k){
     if(bossOnScreen()){G.boss.x+=120;G.boss.stun=.6;for(const p of G.boss.proj)popProj(p)}
     for(const e of G.es){
       if(e.dead||e.state!=='walk'||e.x>G.camX+W)continue;
-      if(e.type==='wraith'){e.diving=false;e.y=Math.max(60,e.y-100);e.x+=140;continue}
+      if(e.type==='wraith'){e.diving=false;e.y=Math.max(60,e.y-100);e.x+=10}
       e.x+=130;e.frozen=Math.max(e.frozen,.6);e.hp-=15;e.flash=.1;
       if(e.hp<=0)kill(e,300,-200,false);
     }
@@ -893,7 +893,7 @@ function drawBoss(){
   ctx.fillStyle='rgba(11,7,22,.75)';ctx.fillRect(0,250,W,120);
   ctx.fillStyle='#ffb347';ctx.fillRect(0,250,W,2);ctx.fillRect(0,368,W,2);
   text('THE HOLLOW HOUR',640,298,60,'#fff2c4');
-  text('Something in here is wearing your colour.',640,342,18,'#ffb347');
+  text('Why does this place feel familiar?',640,342,18,'#ffb347');
   ctx.globalAlpha=1;
 }
 
@@ -902,7 +902,7 @@ function drawBoss(){
 let SC=null;
 const HUD_IN_SCENE=['#cbar','#dodge','#spearPips','#bossbar','#trip','#chron'];
 function startScene(kind){
-  SC={kind,t:0,len:kind==='sol'?29:7.4,parts:[],fx:{},motes:Array.from({length:70},()=>({x:rand(0,W),y:rand(0,470),s:rand(1,2.5),v:rand(4,14)}))};
+  SC={kind,t:0,len:kind==='sol'?29+SOL_HOLD:7.4,parts:[],fx:{},motes:Array.from({length:70},()=>({x:rand(0,W),y:rand(0,470),s:rand(1,2.5),v:rand(4,14)}))};
   G.state='scene';G.blue=0;G.headShake=0;
   for(const e of G.es)if(!e.dead)e.dead=true;
   if(G.boss&&!G.boss.dead){G.boss.dead=true;G.boss.proj=[]}
@@ -925,7 +925,7 @@ function solReset(){
   const gain=newCycle();
   buildLevel(1);G.state='over';
   showMsg(`Cycle ${save.cycles+1}`,'Thrown back',
-    `<div class="pxrow">Paradox earned<b>+${gain}</b></div><div>Best ever<b>Rift ${save.best}</b></div><p>Sol's unbound half threw Wren back to where it all began. He remembers more this time. Spend paradox in the Paradox tab.</p>`,
+    `<div class="pxrow">Paradox earned<b>+${gain}</b></div><div>Best ever<b>Rift ${save.best}</b></div><p>You’re back to before your last run began, somehow. Whatever Sol did to you has given you another chance. Spend paradox in the Paradox tab and find a way to save Sol.</p>`,
     'To the loadout',()=>{enterShop();shopTab='px';renderShop()},false);
 }
 function renderScene(rdt){
@@ -1004,20 +1004,22 @@ function drawFig(x,fy,o){
   ctx.restore();
   return{x:x+f*hx,y:fy+hy};
 }
-function card(txt,a){
+function card(txt,a,inv){
+  const ink=inv?'#0d0a16':'#d8c9a3',paper=inv?'#f3eadb':'#0d0a16',word=inv?'#0d0a16':'#f3eadb';
   if(a<=0)return;
   ctx.save();ctx.globalAlpha=a*.68;ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);ctx.globalAlpha=a;
   const w=580,h=170,x=(W-w)/2,y=(H-h)/2;
-  ctx.fillStyle='#0d0a16';ctx.fillRect(x,y,w,h);
-  ctx.strokeStyle='#d8c9a3';ctx.lineWidth=2;ctx.strokeRect(x+8,y+8,w-16,h-16);ctx.lineWidth=1;ctx.strokeRect(x+15,y+15,w-30,h-30);
-  ctx.fillStyle='#d8c9a3';for(const[cx,cy]of[[x+8,y+8],[x+w-8,y+8],[x+8,y+h-8],[x+w-8,y+h-8]]){ctx.beginPath();ctx.moveTo(cx,cy-5);ctx.lineTo(cx+5,cy);ctx.lineTo(cx,cy+5);ctx.lineTo(cx-5,cy);ctx.closePath();ctx.fill()}
-  ctx.font="italic 500 46px 'Cormorant Garamond', Georgia, serif";ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#f3eadb';ctx.fillText(txt,W/2,H/2+2);
+  ctx.fillStyle=paper;ctx.fillRect(x,y,w,h);
+  ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.strokeRect(x+8,y+8,w-16,h-16);ctx.lineWidth=1;ctx.strokeRect(x+15,y+15,w-30,h-30);
+  ctx.fillStyle=ink;for(const[cx,cy]of[[x+8,y+8],[x+w-8,y+8],[x+8,y+h-8],[x+w-8,y+h-8]]){ctx.beginPath();ctx.moveTo(cx,cy-5);ctx.lineTo(cx+5,cy);ctx.lineTo(cx,cy+5);ctx.lineTo(cx-5,cy);ctx.closePath();ctx.fill()}
+  ctx.font="italic 500 46px 'Cormorant Garamond', Georgia, serif";ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=word;ctx.fillText(txt,W/2,H/2+2);
   ctx.restore();
 }
 // part 2: the still place where Sol is
-const SOL_CARDS=[[3.8,5.8,'Sol?'],[6.8,8.9,'Wren…? You came.'],[12,13.7,'Take it. Come home.'],[16,17.7,'I can’t. It won’t let me go.'],[19.6,22.6,'Not yet.']];
-function sceneSol(t,rdt){
-  const FY=470,c=ctx;
+// cards run on scene time; the action holds still for SOL_HOLD while the unbound half speaks
+const SOL_HOLD=2.1,SOL_CARDS=[[3.8,5.8,'Sol?'],[6.8,8.9,'…I am Sol?'],[12,13.7,'Take it. Come home.'],[16,17.7,'Wren? Is that…'],[17.85,19.75,'Progenitor. Annihilate.',true],[21.7,24.7,'Not yet.']];
+function sceneSol(t0,rdt){
+  const FY=470,c=ctx,t=t0<17.8?t0:Math.max(17.8,t0-SOL_HOLD);
   c.setTransform(K,0,0,K,0,0);
   const bg=c.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#07050f');bg.addColorStop(.7,'#1a0f2e');bg.addColorStop(1,'#0b0716');c.fillStyle=bg;c.fillRect(0,0,W,H);
   // a huge stopped clock behind everything
@@ -1071,7 +1073,7 @@ function sceneSol(t,rdt){
   c.setTransform(K,0,0,K,0,0);
   if(t>18.25&&t<18.6){c.fillStyle=`rgba(255,255,255,${.8*(1-span(t,18.25,18.6))})`;c.fillRect(0,0,W,H)}
   if(t<.6){c.fillStyle=`rgba(230,242,255,${1-t/.6})`;c.fillRect(0,0,W,H)}
-  for(const[a,b,txt]of SOL_CARDS)if(t>a&&t<b)card(txt,Math.min(1,(t-a)/.35,(b-t)/.35));
+  for(const[a,b,txt,inv]of SOL_CARDS)if(t0>a&&t0<b)card(txt,Math.min(1,(t0-a)/.35,(b-t0)/.35),inv);
   if(t>22.6){c.fillStyle=`rgba(0,0,0,${span(t,22.6,23.4)})`;c.fillRect(0,0,W,H)}
 }
 function drawSyncAt(x,y){
@@ -1209,7 +1211,6 @@ function update(dt){
     const prog=progress();
     G.spawnAcc+=sdt*(.3+.1*(G.n-1)+.4*prog)*(G.holding?1.3:1)*(G.boss?.35:1);
     if(G.spawnAcc>=1){G.spawnAcc-=1;spawn(pickType())}
-    if(prog>.5)autoFire('half');
     if(G.es.some(e=>!e.dead&&e.state==='walk'&&!e.phased&&(e.type==='wraith'?Math.hypot(e.x-G.px,e.y-ground(G.px)+50)<80:e.x-G.px<80)))autoFire('close');
     if(!G.s1&&prog>.5){G.s1=true;G.queue+=G.boss?2:3+G.n;openTear();autoFire('surge');G.banner={txt:'THE TIMELINE BUCKLES',t:2.2}}
     if(!G.s2&&prog>.85){G.s2=true;G.queue+=G.boss?3:4+G.n;openTear();openTear();autoFire('surge');G.banner={txt:'COLLAPSE ACCELERATING',t:2.2}}
@@ -1726,7 +1727,7 @@ function render(){
   if(G.state==='play'&&G.n===1&&G.time<6&&!G.holding){
     ctx.globalAlpha=Math.min(1,(6-G.time));
     text(inputMode==='touch'?'DRAG UP OR DOWN TO AIM':'AIM WITH THE MOUSE',640,250,40);
-    text('You walk back and fire on your own. Tap the « button or press Space to rewind-step out of danger.',640,292,17,'#a99ec4');
+    text('You walk back and fire on your own. Tap the « button or press Space to Rewind-Step out of danger.',640,292,17,'#a99ec4');
     ctx.globalAlpha=1;
   }
   if(G.banner){ctx.globalAlpha=Math.min(1,G.banner.t,2.2-G.banner.t+.2);text(G.banner.txt,640,G.holding?172:150,30,'#ff4f9a');ctx.globalAlpha=1}
@@ -1927,7 +1928,7 @@ function showClear(){
     const ch=G.n/5,first=(save.storyAnchors||0)<ch;if(first)save.storyAnchors=ch;persist();
     showMsg(`Chapter ${ch} complete`,first?'An anchor':'Through the rift',
       `<div>Echoes shattered<b>${G.kills}</b></div><div>Anomalies collected<b>+${G.earned}</b></div><div class="ancrow">Sparks earned<b>+${anc}</b></div>`+
-      (first?`<p>As the Hollow Hour comes apart, Sync pulls something out of the wreckage: an anchor, the first thing in the Unbound that feels solid. It hums when Wren holds it.</p>`:`<p>Wren won't spend the anchor yet. Sync tucks it away and tears a new way forward.</p>`),
+      (first?`<p>As the Hollow Hour comes apart, Sync pulls something out of the wreckage: an anchor, the first link he’s found to his sister. It hums when Wren holds it.</p>`:`<p>Wren won't use the anchor yet. Sync tucks it away and tears a new way forward.</p>`),
       'Next rift',()=>{buildLevel(save.level);enterShop()},false);
     return;
   }
@@ -1942,7 +1943,7 @@ function showDead(){
   const pct=Math.round(progress()*100),dist=Math.round(progress()*(20+8*(G.n-1))*salv());
   save.coins+=dist;persist();
   showMsg(`Rift ${G.n} · ${pct}% of the way`,'Erased',
-    `<div>Anomalies collected<b>+${G.earned}</b></div><div>Distance bonus (${pct}%)<b>+${dist}</b></div><p>An echo caught you ${fmtDays(daysLeft(G.px))} short of the rift. Everything you earned is yours to keep.</p>`,
+    `<div>Anomalies collected<b>+${G.earned}</b></div><div>Distance bonus (${pct}%)<b>+${dist}</b></div><p>You didn’t make it, not yet. Upgrade and try again.</p>`,
     'Again',()=>{buildLevel(G.n);enterShop()},false);
 }
 function startOver(){
