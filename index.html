@@ -28,7 +28,7 @@ body{height:100%;margin:0;box-sizing:border-box;background:var(--bg);color:var(-
 #stage{position:absolute;left:50%;top:50%;width:1280px;height:640px;transform:translate(-50%,-50%);transform-origin:center;overflow:hidden;box-shadow:0 0 0 1px rgba(94,242,255,.18),0 18px 50px rgba(0,0,0,.6)}
 #c{position:absolute;left:0;top:0;width:1280px;height:640px;display:block;touch-action:none;cursor:crosshair}
 .hud{position:absolute;pointer-events:none;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
-#trip{left:50%;top:18px;transform:translateX(-50%);width:520px;display:grid;gap:6px;font-size:13px;color:var(--dim)}
+#trip{left:50%;top:16px;transform:translateX(-50%);width:560px;display:grid;gap:6px;font-size:17px;color:var(--dim)}
 #trip .row{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
 #trip .row b{color:var(--ink)}
 #trip .track{position:relative;height:6px;background:rgba(255,255,255,.1)}
@@ -40,7 +40,7 @@ body{height:100%;margin:0;box-sizing:border-box;background:var(--bg);color:var(-
 #mute{position:absolute;right:28px;top:62px;font-family:var(--display);font-weight:700;font-size:12px;letter-spacing:.1em;background:rgba(255,255,255,.06);color:var(--dim);border:1px solid rgba(94,242,255,.25);padding:5px 10px;cursor:pointer}
 .panel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:560px;background:var(--glass);border:1px solid rgba(94,242,255,.35);
   clip-path:polygon(0 0,calc(100% - 22px) 0,100% 22px,100% 100%,22px 100%,0 calc(100% - 22px));padding:26px 30px 28px;box-sizing:border-box;backdrop-filter:blur(3px)}
-.eyebrow{margin:0;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--line)}
+.eyebrow{margin:0;font-size:15px;letter-spacing:.24em;text-transform:uppercase;color:var(--line)}
 .panel h1,.panel h2{margin:4px 0 6px;font-size:44px;line-height:1;font-weight:700;letter-spacing:.02em;text-wrap:balance}
 .sub{margin:0 0 20px;font-family:var(--body);font-size:15px;line-height:1.45;color:var(--dim)}
 .ups{display:grid;gap:10px;margin-bottom:22px}
@@ -59,10 +59,10 @@ body{height:100%;margin:0;box-sizing:border-box;background:var(--bg);color:var(-
 .buy svg{width:11px;height:15px}
 .buy:disabled{background:rgba(255,255,255,.12);color:var(--dim);cursor:not-allowed}
 .buy:not(:disabled):hover{filter:brightness(1.1)}
-.go{width:100%;font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.16em;text-transform:uppercase;color:var(--bg);background:linear-gradient(90deg,var(--line),#b4f7ff);border:0;padding:14px;cursor:pointer;
+.go{width:100%;font-family:var(--display);font-weight:700;font-size:28px;letter-spacing:.16em;text-transform:uppercase;color:var(--bg);background:linear-gradient(90deg,var(--line),#b4f7ff);border:0;padding:14px;cursor:pointer;
   clip-path:polygon(14px 0,100% 0,calc(100% - 14px) 100%,0 100%)}
 .go:hover{filter:brightness(1.08)}
-.rows{display:grid;gap:8px;margin:6px 0 22px;font-family:var(--body);font-size:15px}
+.rows{display:grid;gap:10px;margin:8px 0 24px;font-family:var(--body);font-size:20px}
 .rows div{display:flex;justify-content:space-between;color:var(--dim);border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:6px}
 .rows b{color:var(--amber);font-variant-numeric:tabular-nums}
 .rows p{margin:0;color:var(--dim);line-height:1.5}
@@ -70,17 +70,20 @@ body{height:100%;margin:0;box-sizing:border-box;background:var(--bg);color:var(-
 button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .anc-hud{display:flex;align-items:center;gap:8px;margin-left:10px}
 .anc-hud svg{width:18px;height:20px}
-.loadout{width:720px;padding:20px 28px}
-.loadout .go{padding:12px}
+.loadout{width:1210px;padding:20px 30px}
+.loadout .go{padding:14px;font-size:30px}
 .lh{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:10px}
 .lh h1{margin-bottom:0}
-.lh .sub{margin:0;max-width:280px;text-align:right;font-size:13px}
+.lh .sub{margin:6px 0 0;font-size:18px}
+.wallet{display:flex;gap:12px;align-items:center}
+.wallet span{display:flex;align-items:center;gap:9px;font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;padding:6px 14px;background:rgba(255,255,255,.06)}
+.wallet svg{width:20px;height:24px}
 .seg{display:flex;gap:4px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:14px}
-.seg button{position:relative;background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;color:rgba(255,79,154,.6);font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;padding:8px 11px 9px;cursor:pointer}
+.seg button{position:relative;background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;color:rgba(255,79,154,.6);font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:.08em;text-transform:uppercase;padding:10px 18px 12px;cursor:pointer}
 .seg button:hover{color:rgba(255,79,154,.85)}
 .seg button[aria-selected="true"]{color:var(--mag);border-bottom-color:var(--mag)}
 .seg .dot{position:absolute;top:7px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--line)}
-.pane{min-height:300px;max-height:356px;overflow-y:auto;overscroll-behavior:contain;display:grid;align-content:start;gap:6px;margin-bottom:14px;padding-right:4px;
+.pane{height:340px;display:flex;gap:16px;overflow-x:auto;overflow-y:hidden;overscroll-behavior:contain;scroll-snap-type:x proximity;margin-bottom:16px;padding:2px 2px 12px;
   scrollbar-width:thin;scrollbar-color:rgba(94,242,255,.35) transparent}
 .lbl{margin:8px 0 2px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
 .lbl:first-child{margin-top:0}
@@ -101,18 +104,38 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .gcard .stats{font-family:var(--body);font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
 .gcard .buy{width:100%}
 .rows .ancrow b{color:var(--mag)}
+/* loadout cards */
+.pane.t-up,.pane.t-gun{--acc:#ffb347}.pane.t-gear{--acc:#5ef2ff}.pane.t-sync{--acc:#a99cff}.pane.t-cons{--acc:#ff8f70}.pane.t-px{--acc:#ff5a5a}
+.cd{flex:0 0 268px;scroll-snap-align:start;display:flex;flex-direction:column;gap:9px;padding:14px 16px 16px;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1);border-top:5px solid var(--acc);min-width:0}
+.cd.eq{border-color:var(--acc);border-top-width:5px}
+.cd-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.cd-ico{width:62px;height:62px;display:grid;place-items:center;flex:none;color:var(--acc);background:rgba(255,255,255,.06);border:1.5px solid var(--acc)}
+.cd-ico svg{width:38px;height:38px}
+.pane.t-gun .cd-ico{width:110px}.pane.t-gun .cd-ico svg{width:98px;height:36px}
+.cd-badge{font-size:17px;letter-spacing:.06em;color:var(--dim);text-transform:uppercase;text-align:right;font-variant-numeric:tabular-nums}
+.cd-name{font-size:26px;line-height:1.05;letter-spacing:.02em}
+.cd-val{margin:0;font-family:var(--body);font-size:19px;line-height:1.3;color:var(--ink)}
+.cd-val em{font-style:normal;color:var(--amber);font-weight:600;white-space:nowrap}
+.cd-desc{margin:0;font-family:var(--body);font-size:16.5px;line-height:1.35;color:var(--dim);flex:1;overflow:hidden}
+.cd-bar{height:8px;background:rgba(255,255,255,.12);margin-top:auto}.cd-bar i{display:block;height:100%;background:var(--acc)}
+.cd .buy{width:100%;min-width:0;margin-top:auto;font-size:25px;padding:11px;gap:10px}
+.cd .cd-bar+.buy{margin-top:4px}
+.cd .buy svg{width:17px;height:22px}
+.pane{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.3) transparent}
+#msg.panel{width:660px}
+#msg .rows p{font-size:19px}
 #skip{position:absolute;right:28px;bottom:24px;font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;background:rgba(0,0,0,.4);color:var(--dim);border:1px solid rgba(255,255,255,.2);padding:7px 14px;cursor:pointer;z-index:2}
 #skip:hover{color:var(--ink)}
 #bossbar{left:50%;top:64px;transform:translateX(-50%);width:420px;display:grid;gap:4px;font-size:12px;letter-spacing:.2em;color:#ffb347;text-align:center}
 #bossbar .bb{height:7px;background:rgba(255,255,255,.1);clip-path:polygon(0 0,100% 0,98% 100%,2% 100%)}
 #bossbar .bbf{height:100%;width:100%;background:linear-gradient(90deg,#ffb347,#ff4f9a)}
-.tip{display:flex;align-items:center;gap:14px;margin:0 0 12px;padding:10px 12px;background:rgba(255,179,71,.1);border:1px solid rgba(255,179,71,.45);border-left:3px solid var(--amber)}
-.tip p{margin:0;flex:1;min-width:0;font-family:var(--body);font-size:13px;line-height:1.45;color:var(--ink)}
+.tip{display:flex;align-items:center;gap:16px;margin:0 0 10px;padding:8px 14px;background:rgba(255,179,71,.1);border:1px solid rgba(255,179,71,.45);border-left:3px solid var(--amber)}
+.tip p{margin:0;flex:1;min-width:0;font-family:var(--body);font-size:17px;line-height:1.45;color:var(--ink)}
 .tip p b{color:var(--amber);margin-right:4px}
 .tipbtns{display:flex;flex-direction:column;align-items:center;gap:2px}
 .tipbtns .buy{width:auto;padding:7px 14px}
 .tipbtns .link{margin:2px 0 0}
-.loadout.tipping .pane{max-height:290px;min-height:240px}
+.loadout.tipping .pane{height:290px}
 .rows .pxrow b{color:#ff5a5a}
 .px-hud{display:flex;align-items:center;gap:8px;margin-left:10px}
 .px-hud svg{width:18px;height:18px}
@@ -152,8 +175,9 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .autochip{align-self:flex-end;display:grid;gap:2px;padding:6px 10px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--line);background:rgba(18,10,34,.72);border:1px dashed rgba(94,242,255,.45)}
 .autochip small{font-size:10px;color:var(--dim)}
 .autochip.used{opacity:.4}
-.cfg{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px;font-family:var(--body);font-size:13px;color:var(--dim)}
-.cfg select{font-family:var(--body);font-size:13px;color:var(--ink);background:#1a1030;border:1px solid rgba(94,242,255,.4);padding:4px 6px;max-width:100%}
+.cfg{display:grid;gap:8px;font-family:var(--body);font-size:16px;color:var(--dim);flex:1}
+.cfg label{display:grid;gap:3px}
+.cfg select{font-family:var(--body);font-size:16px;color:var(--ink);background:#1a1030;border:1px solid rgba(94,242,255,.4);padding:4px 6px;max-width:100%}
 .cfg select:focus-visible{outline:2px solid var(--line);outline-offset:1px}
 </style>
 
@@ -175,7 +199,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
     <div id="spearPips" class="hud" hidden></div>
 
     <div id="shop" class="panel loadout" hidden>
-      <div class="lh"><div><p class="eyebrow">Loadout</p><h1 id="shopT">Rift 1</h1></div><p id="shopSub" class="sub"></p></div>
+      <div class="lh"><div><p class="eyebrow">Loadout</p><h1 id="shopT">Rift 1</h1><p id="shopSub" class="sub"></p></div><div id="wallet" class="wallet"></div></div>
       <div id="tip" class="tip" hidden role="status">
         <p><b>Stuck on this rift?</b> Consumables like the Freeze grenade and Barrier can get you through a rough patch. They're used up, but they're cheap.</p>
         <div class="tipbtns"><button type="button" class="buy" data-act="tipgo">Show me</button><button type="button" class="link" data-act="tipx">Got it</button></div>
@@ -1689,7 +1713,7 @@ function hud(){
 }
 const CHRON='<svg viewBox="0 0 11 15" aria-hidden="true"><path d="M5.5 0 11 7.5 5.5 15 0 7.5Z" fill="currentColor"/></svg>';
 const ANC='<svg viewBox="0 0 14 15" aria-hidden="true"><path d="M7 .5 13.5 4.2v6.6L7 14.5.5 10.8V4.2Z" fill="currentColor"/></svg>';
-const ic=p=>`<svg viewBox="0 0 28 28" aria-hidden="true" fill="none" stroke="#5ef2ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const ic=p=>`<svg viewBox="0 0 28 28" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 const ICON={
   power:ic('<path d="M16 3 6 16h8l-2 9 10-13h-8z"/>'),
   rate:ic('<path d="M4 9h10M4 14h14M4 19h10M19 8l6 6-6 6"/>'),
@@ -1726,24 +1750,30 @@ Object.assign(ICON,{
   p_seed:ic('<path d="M14 25V12"/><path d="M14 14c-6 0-8-4-8-8 6 0 8 4 8 8zM14 12c0-5 3-8 8-8 0 5-3 8-8 8z"/>'),
   p_train:ic('<circle cx="14" cy="14" r="10"/><circle cx="14" cy="14" r="5"/><path d="M14 2v4M14 22v4M2 14h4M22 14h4"/>'),
 });
+// loadout cards: one per item, sized for phones. Every card: icon tile, name, value → next, a progress bar, one big button.
+function cardHTML({icon,name,badge,val,next,desc,prog,btn,extra,eq}){
+  return `<div class="cd${eq?' eq':''}"><div class="cd-top"><span class="cd-ico">${icon}</span>${badge?`<span class="cd-badge">${badge}</span>`:''}</div>`+
+    `<b class="cd-name">${name}</b>`+(val?`<p class="cd-val">${val}${next?` <em>→ ${next}</em>`:''}</p>`:'')+(desc?`<p class="cd-desc">${desc}</p>`:'')+(extra||'')+
+    (prog!=null?`<div class="cd-bar"><i style="width:${(prog*100).toFixed(0)}%"></i></div>`:'')+btn+`</div>`;
+}
 function upRow(key,name,def,lv,act,cur='a'){
   const cost=def.cost[lv],v=def.vals,sp=cur==='s',have=sp?save.anchors:save.coins;
-  const val=def.fmt(v[lv])+(cost!==undefined?` <em>→ ${def.short?def.short(v[lv+1]):def.fmt(v[lv+1]).split(' ')[0]}</em>`:'');
   const btn=cost===undefined?`<button class="buy ghost" type="button" disabled>Maxed</button>`
     :`<button class="buy${sp?' anc':''}" type="button" data-act="${act}" aria-label="Upgrade ${name} for ${cost} ${sp?'sparks':'anomalies'}" ${have>=cost?'':'disabled'}>${sp?ANC:CHRON}${cost}</button>`;
-  return `<div class="up"><div class="ico">${ICON[key]}</div><div class="txt"><b>${name}</b><span class="val">${val}</span><div class="ticks">${v.map((_,i)=>`<i class="${i<=lv?'on':''}"></i>`).join('')}</div></div>${btn}</div>`;
+  return cardHTML({icon:ICON[key],name,badge:`Lv ${lv}/${v.length-1}`,val:def.fmt(v[lv]),next:cost!==undefined?(def.short?def.short(v[lv+1]):def.fmt(v[lv+1]).split(' ')[0]):'',prog:lv/(v.length-1),btn});
 }
 function kitRow(k){
   const d=KIT[k],own=save.kit[k];
   if((k==='spear'||k==='after')&&own)return upRow(k,LV[k].name,LV[k],save.lv[k],'lv:'+k,LV[k].cur);
-  const cfg=k==='auto'&&own?`<div class="cfg">Use <select id="autoItem" aria-label="Consumable to deploy">${Object.entries(CONS).map(([c,v])=>`<option value="${c}"${save.auto.item===c?' selected':''}>${v.name}</option>`).join('')}</select> when <select id="autoTrig" aria-label="Trigger">${Object.entries(TRIG).map(([t,v])=>`<option value="${t}"${save.auto.trigger===t?' selected':''}>${v}</option>`).join('')}</select></div>`:'';
-  return `<div class="up"><div class="ico">${ICON[k]}</div><div class="txt"><b>${d.name}</b><span class="val">${d.blurb}</span>${cfg}</div>${own?`<button class="buy ghost" type="button" disabled>Owned</button>`:`<button class="buy anc" type="button" data-act="kit:${k}" aria-label="Buy ${d.name} for ${d.cost} sparks" ${save.anchors>=d.cost?'':'disabled'}>${ANC}${d.cost}</button>`}</div>`;
+  const cfg=k==='auto'&&own?`<div class="cfg"><label>Use<select id="autoItem">${Object.entries(CONS).map(([c,v])=>`<option value="${c}"${save.auto.item===c?' selected':''}>${v.name}</option>`).join('')}</select></label><label>When<select id="autoTrig">${Object.entries(TRIG).map(([t,v])=>`<option value="${t}"${save.auto.trigger===t?' selected':''}>${v}</option>`).join('')}</select></label></div>`:'';
+  const btn=own?`<button class="buy ghost" type="button" disabled>Owned</button>`:`<button class="buy anc" type="button" data-act="kit:${k}" aria-label="Buy ${d.name} for ${d.cost} sparks" ${save.anchors>=d.cost?'':'disabled'}>${ANC}${d.cost}</button>`;
+  return cardHTML({icon:ICON[k],name:d.name,badge:own?'Owned':'',desc:cfg?'':d.blurb,extra:cfg,btn,eq:own});
 }
 const kitDotFor=tab=>Object.keys(KIT).some(k=>KIT[k].tab===tab&&!save.kit[k]&&save.anchors>=KIT[k].cost);
 function gunStats(k){const u=GUNS[k].ups,l=save.guns[k];return `${u.power.vals[l.power]} dmg · ${u.rate.vals[l.rate].toFixed(2)} s`+(u.chain?` · ${u.chain.vals[l.chain]} jump${u.chain.vals[l.chain]>1?'s':''}`:'')}
 function renderShop(){
   $('#shopT').textContent='Rift '+G.n;
-  $('#shopSub').textContent=`The rift is ${fmtDays(daysLeft(G.L))} back. Clear it to earn ${G.n+1+perk('anchor')} sparks for weapons, gear and Sync.`;
+  $('#shopSub').textContent=`The rift is ${fmtDays(daysLeft(G.L))} back. Clear it for ${G.n+1+perk('anchor')} sparks.`;
   const gunDot=Object.keys(GUNS).some(k=>!save.guns[k].owned&&save.anchors>=GUNS[k].unlock);
   document.querySelectorAll('#seg button').forEach(b=>{
     const t=b.dataset.tab;b.setAttribute('aria-selected',String(t===shopTab));
@@ -1753,8 +1783,7 @@ function renderShop(){
   let h='';
   if(shopTab==='up'){
     const g=save.gun;
-    h+=`<p class="lbl">${GUNS[g].name}</p>`+Object.entries(GUNS[g].ups).map(([k,d])=>upRow(k,d.name,d,save.guns[g][k],`gun:${g}:${k}`)).join('');
-    h+=`<p class="note">Sight and Anomaly Collector are in Gear. Switch weapons in Weapons.</p>`;
+    h=Object.entries(GUNS[g].ups).map(([k,d])=>upRow(k,d.name,d,save.guns[g][k],`gun:${g}:${k}`)).join('');
   }else if(shopTab==='gear'){
     h=kitRow('shield')+kitRow('spear')+upRow('dodge',LV.dodge.name,LV.dodge,save.lv.dodge,'lv:dodge',LV.dodge.cur)+kitRow('after')
       +upRow('sight',GEN.sight.name,GEN.sight,save.gen.sight,'gen:sight')
@@ -1762,35 +1791,41 @@ function renderShop(){
   }else if(shopTab==='sync'){
     h=kitRow('mount')+kitRow('auto')+kitRow('capacitor')+kitRow('crit')+upRow('rift',LV.rift.name,LV.rift,save.lv.rift,'lv:rift',LV.rift.cur);
   }else if(shopTab==='gun'){
-    h='<div class="guns">'+Object.entries(GUNS).map(([k,d])=>{
+    h=Object.entries(GUNS).map(([k,d])=>{
       const own=save.guns[k].owned,eq=save.gun===k;
       const btn=eq?`<button class="buy ghost" type="button" disabled>Equipped</button>`
         :own?`<button class="buy" type="button" data-act="equip:${k}">Equip</button>`
         :`<button class="buy anc" type="button" data-act="unlock:${k}" ${save.anchors>=d.unlock?'':'disabled'}>Unlock ${ANC}${d.unlock}</button>`;
-      return `<div class="gcard${eq?' eq':''}">${GUNART[k](d.col)}<b>${d.name}</b><p>${d.blurb}</p><span class="stats">${own?gunStats(k):(d.start?'Starts at power and fire rate level '+d.start+', with 2 chain jumps.':'Upgrades start from zero once unlocked.')}</span>${btn}</div>`;
-    }).join('')+'</div>';
+      return cardHTML({icon:GUNART[k](d.col),name:d.name,badge:eq?'Equipped':own?'Owned':'Locked',val:own?gunStats(k):'',desc:d.blurb+(own?'':' '+(d.start?'Starts at power and fire rate level '+d.start+'.':'')),btn,eq});
+    }).join('');
   }else if(shopTab==='px'){
-    h=`<div class="reset solo"><div><b>Paradox</b><span>Earned when Sol throws Wren back to the beginning: 1 for every rift cleared that cycle. Perks bought here last through every cycle. Best ever: rift ${save.best}${save.cycles?` · cycles: ${save.cycles}`:''}.</span></div></div>`;
+    h=cardHTML({icon:ICON.p_memory,name:'Paradox',desc:`Earned when Sol throws Wren back: 1 for every rift cleared that cycle. Perks last through every cycle. Best ever: rift ${save.best}${save.cycles?` · cycles: ${save.cycles}`:''}.`,btn:''});
     h+=Object.entries(PERKS).map(([k,d])=>{
       const lv=save.perk[k],cost=d.cost[lv],v=d.vals;
       const btn=cost===undefined?`<button class="buy ghost" type="button" disabled>Maxed</button>`
         :`<button class="buy red" type="button" data-act="perk:${k}" aria-label="Buy ${d.name} for ${cost} paradox" ${save.px>=cost?'':'disabled'}>${PXI}${cost}</button>`;
-      return `<div class="up"><div class="ico">${ICON['p_'+k]}</div><div class="txt"><b>${d.name}</b><span class="val">${d.fmt(v[lv])}${cost!==undefined?` <em>→ ${d.short(v[lv+1])}</em>`:''}</span><div class="ticks">${v.map((_,i)=>`<i class="${i<=lv?'on':''}"></i>`).join('')}</div></div>${btn}</div>`;
+      return cardHTML({icon:ICON['p_'+k],name:d.name,badge:`Lv ${lv}/${v.length-1}`,val:d.fmt(v[lv]),next:cost!==undefined?d.short(v[lv+1]):'',prog:lv/(v.length-1),btn});
     }).join('');
   }else if(shopTab==='cons'){
     h=Object.entries(CONS).map(([k,d])=>{
       const n=save.cons[k],full=n>=CONS_MAX;
       const btn=full?`<button class="buy ghost" type="button" disabled>Full</button>`
         :`<button class="buy" type="button" data-act="cons:${k}" aria-label="Buy one ${d.name} for ${d.cost} anomalies" ${save.coins>=d.cost?'':'disabled'}>${CHRON}${d.cost}</button>`;
-      return `<div class="up"><div class="ico">${ICON[k]}</div><div class="txt"><b>${d.name} <span class="carry">${n}/${CONS_MAX}</span></b><span class="val">${d.blurb}</span></div>${btn}</div>`;
-    }).join('')+`<p class="note">Used up when you use them. Press 1–5 or tap the buttons at the bottom of the screen during a run.</p>`;
+      return cardHTML({icon:ICON[k],name:d.name,badge:`${n}/${CONS_MAX} · key ${d.key}`,desc:d.blurb,prog:n/CONS_MAX,btn});
+    }).join('');
   }
-  $('#pane').innerHTML=h;
+  $('#wallet').innerHTML=`<span style="color:#ffb347" aria-label="${save.coins} anomalies">${CHRON}${save.coins}</span><span style="color:#ff4f9a" aria-label="${save.anchors} sparks">${ANC}${save.anchors}</span>`+
+    (save.px||save.cycles?`<span style="color:#ff5a5a" aria-label="${save.px} paradox">${PXI}${save.px}</span>`:'');
+  // keep the card row where it was when re-rendering the same tab (e.g. after buying)
+  const pn=$('#pane'),keepX=pn.dataset.tab===shopTab?pn.scrollLeft:0;
+  pn.className='pane t-'+shopTab;pn.dataset.tab=shopTab;pn.innerHTML=h;pn.scrollLeft=keepX;
   // after 3 deaths on the same rift with nothing in the consumables bag, nudge the player toward them (once per rift)
   const tip=save.streak>=3&&Object.values(save.cons).every(n=>n===0)&&save.tipRift!==G.n&&shopTab!=='cons';
   $('#tip').hidden=!tip;$('#shop').classList.toggle('tipping',tip);
   hud();
 }
+// desktop: the mouse wheel scrolls the card row sideways (touch just swipes)
+$('#pane').addEventListener('wheel',ev=>{const p=ev.currentTarget;if(Math.abs(ev.deltaY)>Math.abs(ev.deltaX)&&p.scrollWidth>p.clientWidth){p.scrollLeft+=ev.deltaY;ev.preventDefault()}},{passive:false});
 $('#shop').addEventListener('change',ev=>{
   if(ev.target.id==='autoItem')save.auto.item=ev.target.value;
   else if(ev.target.id==='autoTrig')save.auto.trigger=ev.target.value;
