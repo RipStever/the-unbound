@@ -716,19 +716,27 @@ function lose(){
 // ---------- boss: the Hollow Hour (every 5th rift) ----------
 // a pursuer: it crawls after Wren a little faster than he walks. You don't have to kill it, just reach the rift first.
 // its amber cores open and close; hitting an open core damages it and knocks it back. It also hurls shards you can shoot down.
-const BOSS_SP=60,BOSS_ENTER=1080,BOSS_REACH=70,PROJ_G=600;
+const BOSS_SP=60,BOSS_ENTER=1080,BOSS_REACH=165,PROJ_G=600;
 function makeBoss(n){const hp=Math.round(1400*(1+.15*(n-1)));return{x:0,in:false,hp,max:hp,atk:3,coreT:3,open:false,flash:0,dead:false,deadT:0,stun:0,frozen:0,proj:[],carded:false,step:0}}
 const bossOnScreen=()=>G.boss&&G.boss.in&&!G.boss.dead&&G.boss.x-60<G.camX+W;
-// body parts relative to the boss's feet; cores are the weak points
-function bossGeo(){
-  const b=G.boss,x=b.x,gy=ground(x),bob=Math.sin(b.step*2)*4;
-  return{x,gy,body:{x:x+18,y:gy-128+bob,rx:66,ry:84},head:{x:x-38,y:gy-206+bob,r:34},
-    cores:[{x:x-22,y:gy-120+bob},{x:x+16,y:gy-184+bob},{x:x+46,y:gy-74+bob}]};
-}
-function bossHitTest(px,py,R=0){
+// body parts relative to the boss's feet; cores are the weak points.
+// It's a striding colossus: a hollow cracked clock dial for a body, four clock-hand blade legs, a long hooded mask
+// it's drawn at BOSS_S scale around its feet; bossGeo(true) gives the scaled positions used for hits and shards
+const BOSS_S=1.35;
+function bossGeo(raw){
+  const b=G.boss,x=b.x,gy=ground(x),bob=Math.sin(b.step*4.8)*3;
+  const D={x:x+10,y:gy-158+bob};
+  const g={x,gy,bob,D,body:{x:D.x,y:D.y,rx:72,ry:72},head:{x:x-64,y:gy-208+bob,r:24},
+    cores:[{x:D.x,y:D.y},{x:x-30,y:gy-196+bob},{x:D.x+40,y:D.y+42}]};
+  if(raw)return g;
+  const S=p=>({x:x+(p.x-x)*BOSS_S,y:gy+(p.y-gy)*BOSS_S});
+  return{...g,D:S(D),body:{...S(g.body),rx:72*BOSS_S,ry:72*BOSS_S},head:{...S(g.head),r:24*BOSS_S},cores:g.cores.map(S)};
+}function bossHitTest(px,py,R=0){
   const g=bossGeo();
-  if(G.boss.open)for(const c of g.cores)if(Math.hypot(px-c.x,py-c.y)<15+R)return'core';
+  if(G.boss.open)for(const c of g.cores)if(Math.hypot(px-c.x,py-c.y)<15*BOSS_S+R)return'core';
   if(Math.hypot(px-g.head.x,py-g.head.y)<g.head.r)return'body';
+  // while its shutters are open the dial is hollow, so shots pass through to reach the cores
+  if(G.boss.open)return null;
   const dx=(px-g.body.x)/g.body.rx,dy=(py-g.body.y)/g.body.ry;if(dx*dx+dy*dy<1)return'body';
   return null;
 }
@@ -788,44 +796,90 @@ function updateBoss(dt,playing,LS){
   }
   b.proj=b.proj.filter(p=>!p.dead);
 }
-function bossLimb(a,m,c,w,col){ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(m.x,m.y);ctx.lineTo(c.x,c.y);ctx.stroke()}
-function bossShape(g,col,dx){
-  const s=G.boss.step,x=g.x+dx,gy=g.gy;
-  // front arms crawl forward along the ground toward Wren
-  for(let i=0;i<3;i++){const ph=s*3+i*2.1,reach=Math.sin(ph)*16;
-    bossLimb({x:x-6+dx*0,y:gy-150},{x:x-60-i*20+reach,y:gy-120+i*10},{x:x-90-i*26+reach*1.4,y:gy},10-i*1.5,col)}
-  for(let i=0;i<2;i++){const ph=s*3+i*3;bossLimb({x:x+50,y:gy-80},{x:x+80+i*14,y:gy-50+Math.sin(ph)*6},{x:x+70+i*26,y:gy},9,col)}
-  ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(g.body.x+dx,g.body.y,g.body.rx,g.body.ry,-.35,0,7);ctx.fill();
-  ctx.beginPath();ctx.arc(g.head.x+dx,g.head.y,g.head.r,0,7);ctx.fill();
+// legs: four blades that stride on their points. Returns hip, knee and foot for each leg.
+function bossLegs(g){
+  const b=G.boss,c=b.step*2.4,x=g.x,gy=g.gy,legs=[];
+  const defs=[[x-26,-152,0],[x-30,-92,Math.PI],[x+56,70,Math.PI/2],[x+52,128,Math.PI*1.5]];
+  for(const[hx,fx,ph]of defs){
+    const a=c+ph,lift=Math.max(0,Math.sin(a))*20,foot={x:x+fx-Math.cos(a)*22,y:gy-lift},hip={x:hx,y:gy-120+g.bob};
+    const mx=(hip.x+foot.x)/2,my=(hip.y+foot.y)/2,dx=foot.x-hip.x,dy=foot.y-hip.y,l=Math.hypot(dx,dy)||1;
+    let nx=-dy/l,ny=dx/l;if(ny>0){nx=-nx;ny=-ny}
+    const bend=fx<0?62:46;legs.push({hip,knee:{x:mx+nx*bend+(fx<0?-10:8),y:my+ny*bend},foot});
+  }
+  return legs;
+}
+function blade(a,b,w0,w1){
+  const dx=b.x-a.x,dy=b.y-a.y,l=Math.hypot(dx,dy)||1,nx=-dy/l,ny=dx/l,mx=a.x+dx*.35,my=a.y+dy*.35;
+  ctx.beginPath();ctx.moveTo(a.x+nx*w0/2,a.y+ny*w0/2);ctx.lineTo(mx+nx*w1/2,my+ny*w1/2);ctx.lineTo(b.x,b.y);ctx.lineTo(mx-nx*w1/2,my-ny*w1/2);ctx.lineTo(a.x-nx*w0/2,a.y-ny*w0/2);ctx.closePath();ctx.fill();
+}
+function maskPath(g,dx){
+  const x=g.x+dx,y=g.gy+g.bob;
+  ctx.beginPath();ctx.moveTo(x-26,y-228);ctx.lineTo(x-104,y-210);ctx.lineTo(x-78,y-196);ctx.lineTo(x-34,y-182);ctx.lineTo(x-14,y-204);ctx.closePath();
+}
+// the silhouette (legs, dial, mask), drawn three times for the colour-fringe look
+function bossShape(g,legs,col,dx,back){
+  ctx.fillStyle=col;
+  for(let i=0;i<4;i++){const L=legs[i],isBack=i>=2;if(isBack!==back)continue;
+    const h={x:L.hip.x+dx,y:L.hip.y},k={x:L.knee.x+dx,y:L.knee.y},f={x:L.foot.x+dx,y:L.foot.y};
+    blade(h,k,10,16);blade(k,f,12,10);ctx.beginPath();ctx.arc(k.x,k.y,8,0,7);ctx.fill()}
+  if(back)return;
+  ctx.beginPath();ctx.arc(g.D.x+dx,g.D.y,72,0,7);ctx.fill();
+  maskPath(g,dx);ctx.fill();
 }
 function drawBoss(){
   const b=G.boss;if(!b||!b.in||b.dead)return;
-  const g=bossGeo();if(g.x-200>G.camX+W)return;
-  ctx.save();
-  if(G.holding){ctx.globalAlpha=.9;tentacles([[{x:g.body.x+50,y:g.body.y-60},-.9],[{x:g.body.x+60,y:g.body.y-20},-.3],[{x:g.body.x+55,y:g.body.y+20},.3]],2,1,1)}
-  ctx.globalAlpha=1;
-  bossShape(g,'rgba(255,79,154,.5)',-4);bossShape(g,'rgba(94,242,255,.5)',4);
-  bossShape(g,b.flash>0?'#ffffff':b.frozen>0?'#bfe6ff':'#ece6ff',0);
-  // plating cracks
-  ctx.strokeStyle='rgba(26,15,46,.45)';ctx.lineWidth=2.5;ctx.beginPath();
-  ctx.moveTo(g.body.x-40,g.body.y-50);ctx.lineTo(g.body.x-10,g.body.y-10);ctx.lineTo(g.body.x-30,g.body.y+30);ctx.lineTo(g.body.x+10,g.body.y+70);
-  ctx.moveTo(g.body.x+30,g.body.y-70);ctx.lineTo(g.body.x+20,g.body.y-20);ctx.lineTo(g.body.x+50,g.body.y+10);ctx.stroke();
-  // head: a broken clock face with a single amber eye (Wren's colour)
-  const h=g.head;ctx.strokeStyle='rgba(26,15,46,.55)';ctx.lineWidth=2;
-  for(let i=0;i<12;i++){const a=i/12*Math.PI*2;ctx.beginPath();ctx.moveTo(h.x+Math.cos(a)*(h.r-3),h.y+Math.sin(a)*(h.r-3));ctx.lineTo(h.x+Math.cos(a)*(h.r-(i%3?8:12)),h.y+Math.sin(a)*(h.r-(i%3?8:12)));ctx.stroke()}
-  ctx.beginPath();ctx.moveTo(h.x+6,h.y-h.r);ctx.lineTo(h.x,h.y-10);ctx.lineTo(h.x+10,h.y+4);ctx.lineTo(h.x+2,h.y+h.r);ctx.stroke();
-  const eg=ctx.createRadialGradient(h.x-12,h.y-2,1,h.x-12,h.y-2,18);eg.addColorStop(0,'rgba(255,179,71,.7)');eg.addColorStop(1,'rgba(255,179,71,0)');
-  ctx.fillStyle=eg;ctx.beginPath();ctx.arc(h.x-12,h.y-2,18,0,7);ctx.fill();
-  ctx.fillStyle='#ffb347';ctx.beginPath();ctx.moveTo(h.x-24,h.y-5);ctx.lineTo(h.x-2,h.y-2);ctx.lineTo(h.x-24,h.y+2);ctx.closePath();ctx.fill();
-  // weak points
+  const g=bossGeo(true);if(g.x-260>G.camX+W)return;
+  const legs=bossLegs(g),D=g.D,t=G.time,rage=G.holding,body=b.flash>0?'#ffffff':b.frozen>0?'#bfe6ff':'#ece6ff';
+  ctx.save();ctx.translate(g.x,g.gy);ctx.scale(BOSS_S,BOSS_S);ctx.translate(-g.x,-g.gy);
+  // tattered cloak streaming behind it, glitching at the ends
+  for(let i=0;i<6;i++){
+    const y0=D.y-64+i*14,len=150+i*18;ctx.lineCap='butt';
+    for(let k=0;k<10;k++){
+      const u0=k/10,u1=(k+1)/10,w=(22-i*2.2)*(1-u0);
+      ctx.strokeStyle=rage?`rgba(110,20,50,${.85*(1-u0)})`:`rgba(42,16,72,${.88*(1-u0)})`;ctx.lineWidth=w;ctx.beginPath();
+      ctx.moveTo(D.x+30+u0*len,y0+Math.sin(t*3+i+u0*5)*10*u0);ctx.lineTo(D.x+30+u1*len,y0+Math.sin(t*3+i+u1*5)*10*u1);ctx.stroke();
+    }
+    if(Math.sin(t*7+i*3)>.6){ctx.fillStyle='rgba(255,79,154,.5)';ctx.fillRect(D.x+30+len*.8,y0+rand(-8,8),rand(6,16),3)}
+  }
+  // back legs, darker, then a hood behind the mask, then the fringe passes and the main body
+  bossShape(g,legs,'#8a82a8',0,true);
+  {const x=g.x,y=g.gy+g.bob;ctx.fillStyle=rage?'#3a0c22':'#1d0c33';ctx.beginPath();ctx.moveTo(x+6,y-238);ctx.quadraticCurveTo(x-60,y-262,x-112,y-214);ctx.lineTo(x-80,y-188);ctx.lineTo(x-28,y-170);ctx.lineTo(x+20,y-196);ctx.closePath();ctx.fill()}
+  bossShape(g,legs,'rgba(255,79,154,.5)',-4,false);bossShape(g,legs,'rgba(94,242,255,.5)',4,false);
+  bossShape(g,legs,body,0,false);
+  // clock-hand counterweights on the front knees
+  ctx.fillStyle='#2a1d3a';for(let i=0;i<2;i++){const k=legs[i].knee;ctx.beginPath();ctx.arc(k.x,k.y,4,0,7);ctx.fill()}
+  // the dial: rim ticks, a hollow void, cracks, and hands spinning backward
+  ctx.strokeStyle='rgba(26,15,46,.7)';
+  for(let i=0;i<60;i++){const a=i/60*Math.PI*2,l=i%5?6:13;ctx.lineWidth=i%5?1.5:3.5;ctx.beginPath();ctx.moveTo(D.x+Math.cos(a)*68,D.y+Math.sin(a)*68);ctx.lineTo(D.x+Math.cos(a)*(68-l),D.y+Math.sin(a)*(68-l));ctx.stroke()}
+  const vg=ctx.createRadialGradient(D.x,D.y,4,D.x,D.y,46);vg.addColorStop(0,rage?'#4a0a1e':'#05020a');vg.addColorStop(1,'#1c0d30');
+  ctx.fillStyle=vg;ctx.beginPath();ctx.arc(D.x,D.y,46,0,7);ctx.fill();
+  ctx.strokeStyle='rgba(26,15,46,.55)';ctx.lineWidth=2.5;ctx.beginPath();
+  ctx.moveTo(D.x-30,D.y-62);ctx.lineTo(D.x-18,D.y-46);ctx.moveTo(D.x+52,D.y+40);ctx.lineTo(D.x+36,D.y+30);ctx.lineTo(D.x+42,D.y+14);
+  ctx.moveTo(D.x-64,D.y+22);ctx.lineTo(D.x-46,D.y+12);ctx.stroke();
+  const spin=t*(rage?-9:-2.4);
+  for(const[len,w,off]of[[40,4,0],[28,6,spin*.083]]){const a=spin+off-Math.PI/2;ctx.strokeStyle='#ece6ff';ctx.lineWidth=w;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(D.x,D.y);ctx.lineTo(D.x+Math.cos(a)*len,D.y+Math.sin(a)*len);ctx.stroke();
+    ctx.fillStyle='#ffb347';ctx.beginPath();ctx.arc(D.x+Math.cos(a)*len,D.y+Math.sin(a)*len,2.5,0,7);ctx.fill()}
+  // mask details: hood shadow and the amber eye slit (Wren's colour)
+  const mx=g.x,my=g.gy+g.bob;
+  ctx.fillStyle='rgba(26,15,46,.55)';ctx.beginPath();ctx.moveTo(mx-26,my-228);ctx.lineTo(mx-70,my-220);ctx.lineTo(mx-40,my-210);ctx.lineTo(mx-16,my-212);ctx.closePath();ctx.fill();
+  const eg=ctx.createRadialGradient(mx-62,my-208,1,mx-62,my-208,22);eg.addColorStop(0,'rgba(255,179,71,.75)');eg.addColorStop(1,'rgba(255,179,71,0)');
+  ctx.fillStyle=eg;ctx.beginPath();ctx.arc(mx-62,my-208,22,0,7);ctx.fill();
+  ctx.fillStyle='#ffb347';ctx.beginPath();ctx.moveTo(mx-82,my-209);ctx.lineTo(mx-48,my-207);ctx.lineTo(mx-80,my-203);ctx.closePath();ctx.fill();
+  // fragments orbiting the dial
+  for(let i=0;i<8;i++){const a=t*(rage?1.6:.7)+i/8*Math.PI*2,r=104+Math.sin(t+i)*6,px=D.x+Math.cos(a)*r,py=D.y+Math.sin(a)*r*.55;
+    ctx.save();ctx.translate(px,py);ctx.rotate(a*2);ctx.fillStyle=i%3?'#ece6ff':'rgba(255,79,154,.8)';ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(4,2);ctx.lineTo(-3,5);ctx.closePath();ctx.fill();ctx.restore()}
+  // weak points: shuttered when closed, blazing amber when open
   for(const c of g.cores){
     if(b.open){
-      const cg=ctx.createRadialGradient(c.x,c.y,2,c.x,c.y,26);cg.addColorStop(0,'rgba(255,179,71,.8)');cg.addColorStop(1,'rgba(255,179,71,0)');
-      ctx.fillStyle=cg;ctx.beginPath();ctx.arc(c.x,c.y,26,0,7);ctx.fill();
+      const cg=ctx.createRadialGradient(c.x,c.y,2,c.x,c.y,28);cg.addColorStop(0,'rgba(255,179,71,.85)');cg.addColorStop(1,'rgba(255,179,71,0)');
+      ctx.fillStyle=cg;ctx.beginPath();ctx.arc(c.x,c.y,28,0,7);ctx.fill();
       ctx.fillStyle='#ffb347';ctx.beginPath();ctx.arc(c.x,c.y,11,0,7);ctx.fill();ctx.fillStyle='#fff2c4';ctx.beginPath();ctx.arc(c.x,c.y,4.5,0,7);ctx.fill();
-    }else{ctx.fillStyle='#2a1d3a';ctx.beginPath();ctx.arc(c.x,c.y,11,0,7);ctx.fill();ctx.strokeStyle='rgba(255,179,71,.35)';ctx.lineWidth=1.5;ctx.stroke()}
+    }else{
+      ctx.fillStyle='#2a1d3a';ctx.beginPath();for(let i=0;i<6;i++){const a=i/6*Math.PI*2+Math.PI/6;ctx.lineTo(c.x+Math.cos(a)*12,c.y+Math.sin(a)*12)}ctx.closePath();ctx.fill();
+      ctx.strokeStyle='rgba(255,179,71,.45)';ctx.lineWidth=1.5;ctx.stroke();
+    }
   }
-  if(b.stun>0)stunSparks({x:g.body.x,y:g.body.y},3);
+  if(b.stun>0)stunSparks({x:D.x,y:D.y},2.4);
   ctx.restore();
   for(const p of b.proj){
     ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);
@@ -833,8 +887,7 @@ function drawBoss(){
     ctx.fillStyle='#2a1d3a';ctx.beginPath();ctx.moveTo(0,-10);ctx.lineTo(7,0);ctx.lineTo(0,10);ctx.lineTo(-7,0);ctx.closePath();ctx.fill();
     ctx.strokeStyle='#ffb347';ctx.lineWidth=1.5;ctx.stroke();ctx.restore();
   }
-}
-function drawBossCard(){
+}function drawBossCard(){
   const rt=(performance.now()-G.bossCard)/1000;if(rt>3.2)return;
   const a=Math.min(1,rt/.3,(3.2-rt)/.5);ctx.globalAlpha=a;
   ctx.fillStyle='rgba(11,7,22,.75)';ctx.fillRect(0,250,W,120);
