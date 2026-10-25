@@ -26,6 +26,7 @@ body{height:100%;margin:0;box-sizing:border-box;background:var(--bg);color:var(-
 #trip .row b{color:var(--ink)}
 #trip .track{position:relative;height:6px;background:rgba(255,255,255,.1)}
 #trip .done{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,var(--line),var(--mag))}
+#trip .done.gold{background:linear-gradient(90deg,#ffb347,#fff2c4)}
 #trip .rift{position:absolute;right:-7px;top:-5px;width:12px;height:16px;border:2px solid var(--mag);border-radius:50%;box-shadow:0 0 10px var(--mag)}
 #chron{right:28px;top:20px;display:flex;align-items:center;gap:10px;font-size:26px;font-variant-numeric:tabular-nums;color:var(--ink)}
 #chron svg{width:20px;height:26px}
@@ -62,13 +63,13 @@ body{height:100%;margin:0;box-sizing:border-box;background:var(--bg);color:var(-
 button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .anc-hud{display:flex;align-items:center;gap:8px;margin-left:10px}
 .anc-hud svg{width:18px;height:20px}
-.loadout{width:680px;padding:20px 28px}
+.loadout{width:720px;padding:20px 28px}
 .loadout .go{padding:12px}
 .lh{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:10px}
 .lh h1{margin-bottom:0}
 .lh .sub{margin:0;max-width:280px;text-align:right;font-size:13px}
 .seg{display:flex;gap:4px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:14px}
-.seg button{position:relative;background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;color:rgba(255,79,154,.6);font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;padding:8px 16px 9px;cursor:pointer}
+.seg button{position:relative;background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;color:rgba(255,79,154,.6);font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;padding:8px 11px 9px;cursor:pointer}
 .seg button:hover{color:rgba(255,79,154,.85)}
 .seg button[aria-selected="true"]{color:var(--mag);border-bottom-color:var(--mag)}
 .seg .dot{position:absolute;top:7px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--line)}
@@ -118,6 +119,10 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
   --p:1;background-image:conic-gradient(rgba(94,242,255,.22) calc(var(--p)*360deg),transparent 0)}
 #dodge svg{width:40px;height:40px;grid-area:1/1}
 #dodge b{grid-area:1/1;font-size:26px;font-variant-numeric:tabular-nums;color:var(--ink)}
+#spearPips{left:28px;top:calc(50% + 56px);width:92px;display:flex;justify-content:center;gap:5px;align-items:center;font-size:10px;letter-spacing:.12em;color:var(--dim)}
+#spearPips i{width:14px;height:5px;background:rgba(255,179,71,.18);position:relative;overflow:hidden}
+#spearPips i.on{background:#ffb347}
+#spearPips i b{position:absolute;left:0;top:0;bottom:0;background:rgba(255,179,71,.6)}
 #dodge.cool{cursor:default}
 #dodge.cool svg{opacity:.18}
 #dodge:not(.cool):hover{background-color:rgba(94,242,255,.12)}
@@ -134,25 +139,27 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
     <canvas id="c" width="1280" height="640"></canvas>
 
     <div id="trip" class="hud">
-      <div class="row"><span id="tripL">Rift 1</span><span><b id="tripM">0 days</b> to the rift</span></div>
+      <div class="row"><span id="tripL">Rift 1</span><span><b id="tripM">0 days</b><span id="tripS"> to the rift</span></span></div>
       <div class="track"><div class="done"></div><div class="rift"></div></div>
     </div>
     <div id="chron" class="hud"><svg viewBox="0 0 20 26" aria-hidden="true"><path d="M10 1 19 13 10 25 1 13Z" fill="#5ef2ff" stroke="#e6fdff" stroke-width="1.2"/><path d="M10 1v24M1 13h18" stroke="#0b0716" stroke-opacity=".35"/></svg><b id="chronN">0</b><span class="anc-hud"><svg viewBox="0 0 14 15" aria-hidden="true"><path d="M7 .5 13.5 4.2v6.6L7 14.5.5 10.8V4.2Z" fill="#ff4f9a" stroke="#ffd1e6" stroke-width="1"/></svg><b id="ancN">0</b></span><span class="px-hud" id="pxHud" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 15 8 8 15 1 8Z" fill="#ff5a5a" stroke="#ffd0d0" stroke-width="1"/><path d="M8 4v8" stroke="#3a0d14" stroke-width="1.6"/></svg><b id="pxN">0</b></span></div>
     <button id="mute" type="button">Sound on</button>
     <div id="cbar" hidden></div>
     <button id="dodge" type="button" hidden aria-label="Rewind step (Space)"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M21 10 11 20l10 10M31 10 21 20l10 10" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg><b id="dodgeN"></b></button>
+    <div id="spearPips" class="hud" hidden></div>
 
     <div id="shop" class="panel loadout" hidden>
       <div class="lh"><div><p class="eyebrow">Loadout</p><h1 id="shopT">Rift 1</h1></div><p id="shopSub" class="sub"></p></div>
       <div id="seg" class="seg" role="tablist">
         <button type="button" role="tab" data-tab="up">Upgrades</button>
         <button type="button" role="tab" data-tab="gun">Weapons</button>
-        <button type="button" role="tab" data-tab="kit">Kit</button>
+        <button type="button" role="tab" data-tab="gear">Gear</button>
+        <button type="button" role="tab" data-tab="sync">Sync</button>
         <button type="button" role="tab" data-tab="cons">Consumables</button>
         <button type="button" role="tab" data-tab="px">Paradox</button>
       </div>
       <div id="pane" class="pane" role="tabpanel"></div>
-      <button id="go" class="go" type="button">Begin retreat</button>
+      <button id="go" class="go" type="button">Begin rewind</button>
     </div>
 
     <div id="msg" class="panel" hidden>
@@ -193,16 +200,24 @@ const GUNS={
 };
 const GEN={
   sight:{name:'Sight',vals:SIGHT,cost:[8,20,45,90,160,260,400],fmt:v=>Math.round(v/10)+' m aim line'},
-  salvage:{name:'Salvage',vals:[1,1.3,1.6,2,2.4,2.9,3.5,4.2],cost:[20,50,110,220,400,700,1100],fmt:v=>'x'+v.toFixed(1)+' chronons per kill'},
+  salvage:{name:'Anomaly Collector',vals:[1,1.3,1.6,2,2.4,2.9,3.5,4.2],cost:[20,50,110,220,400,700,1100],fmt:v=>'x'+v.toFixed(1)+' anomalies per kill'},
 };
+// one-time items bought with sparks; tab says whether Wren wears it (gear) or Sync runs it (sync)
 const KIT={
-  mount:{name:'Mount arm',cost:6,blurb:'A shoulder-mounted bolt pistol that fires straight ahead on its own, using your bolt pistol upgrades.'},
-  auto:{name:'Auto-deployer',cost:4,blurb:'Uses one of your consumables for you, once per run, when the trigger you pick happens.'},
-  shield:{name:'Phase shield',cost:3,blurb:'Takes one hit per run, then breaks in a stasis burst that freezes everything near you.'},
-  capacitor:{name:'Stasis capacitor',cost:3,blurb:'Every freeze lasts 50% longer: cores, grenades and the shield burst.'},
-  crit:{name:'Crit sight',cost:2,blurb:'Lights up each echo\'s critical point in amber so headshots are easy to see. Crits only land with the Bolt pistol.'},
-  boots:{name:'Chrono boots',cost:5,blurb:'You walk back 15% faster, so you reach the rift sooner.'},
+  shield:{tab:'gear',name:'Phase shield',cost:3,blurb:'Takes one hit per run, then breaks in a stasis burst that freezes everything near you.'},
+  spear:{tab:'gear',name:'Spear',cost:4,blurb:'Wren jabs anything that gets close, automatically. Works on charges that refill one at a time.'},
+  boots:{tab:'gear',name:'Chrono boots',cost:5,blurb:'You walk back 15% faster, so you reach the rift sooner.'},
+  mount:{tab:'sync',name:'Mounted weapon',cost:6,blurb:'Sync carries a bolt pistol and fires straight ahead on his own, using your Bolt pistol upgrades.'},
+  auto:{tab:'sync',name:'Auto-deployer',cost:4,blurb:'Sync uses one of your consumables for you, once per run, when the trigger you pick happens.'},
+  capacitor:{tab:'sync',name:'Stasis capacitor',cost:3,blurb:'Every freeze lasts 50% longer: cores, grenades and the shield burst.'},
+  crit:{tab:'sync',name:'Crit sight',cost:2,blurb:'Sync marks each echo\'s critical point in amber so headshots are easy to see. Crits only land with the Bolt pistol.'},
 };
+// levelled items; cur 'a' = anomalies, 's' = sparks. needs = the KIT item that must be owned first
+const LV={
+  spear:{needs:'spear',name:'Spear charges',vals:[1,2,3,4],cost:[80,200,450],cur:'a',fmt:v=>v+' charge'+(v>1?'s':'')+', 6 s each to refill'},
+  rift:{name:'Rift breaker',vals:[8,6.8,5.6,4.5,3.5],cost:[2,3,5,8],cur:'s',fmt:v=>v.toFixed(1)+' s for Sync to open a rift'},
+};
+const lv=k=>LV[k].vals[save.lv[k]];
 const TRIG={close:'an echo gets within 8 m',dive:'a wraith starts diving',surge:'a surge starts',half:'you pass halfway',shield:'your shield breaks'};
 const frz=()=>save.kit.capacitor?1.5:1;
 const CONS={
@@ -213,21 +228,21 @@ const CONS={
 };
 const CONS_MAX=5;
 const PERKS={
-  start:{name:'Head start',vals:[0,40,100,220,450,900],cost:[1,2,3,5,8],fmt:v=>`Begin each cycle with ${v} chronons`,short:v=>v},
-  memory:{name:'Echo memory',vals:[1,1.15,1.3,1.45,1.6,1.8],cost:[1,2,4,6,9],fmt:v=>`x${v.toFixed(2)} chronons from kills and distance`,short:v=>'x'+v.toFixed(2)},
-  anchor:{name:'Anchor yield',vals:[0,1,2,3],cost:[2,4,7],fmt:v=>`+${v} extra anchors per rift cleared`,short:v=>'+'+v},
-  seed:{name:'Seed anchors',vals:[0,2,4,6],cost:[1,3,5],fmt:v=>`Begin each cycle with ${v} anchors`,short:v=>v},
+  start:{name:'Head start',vals:[0,40,100,220,450,900],cost:[1,2,3,5,8],fmt:v=>`Begin each cycle with ${v} anomalies`,short:v=>v},
+  memory:{name:'Echo memory',vals:[1,1.15,1.3,1.45,1.6,1.8],cost:[1,2,4,6,9],fmt:v=>`x${v.toFixed(2)} anomalies from kills and distance`,short:v=>'x'+v.toFixed(2)},
+  anchor:{name:'Spark yield',vals:[0,1,2,3],cost:[2,4,7],fmt:v=>`+${v} extra sparks per rift cleared`,short:v=>'+'+v},
+  seed:{name:'Seed sparks',vals:[0,2,4,6],cost:[1,3,5],fmt:v=>`Begin each cycle with ${v} sparks`,short:v=>v},
   train:{name:'Field training',vals:[0,1,2,3],cost:[2,4,7],fmt:v=>`Bolt pistol starts at power and fire rate level ${v}`,short:v=>'level '+v},
 };
 const perk=k=>PERKS[k].vals[save.perk[k]];
 const SKEY='sdr-rift-v5';
-const fresh=()=>({level:1,coins:0,anchors:0,gun:'bolt',guns:{bolt:{owned:true,power:0,rate:0},arc:{owned:false,power:0,rate:0,chain:0}},gen:{sight:0,salvage:0},kit:{mount:false,auto:false,shield:false,capacitor:false,crit:false,boots:false},cons:{grenade:0,wall:0,overclock:0,shock:0},auto:{item:'wall',trigger:'close'},
+const fresh=()=>({level:1,coins:0,anchors:0,gun:'bolt',guns:{bolt:{owned:true,power:0,rate:0},arc:{owned:false,power:0,rate:0,chain:0}},gen:{sight:0,salvage:0},kit:{mount:false,auto:false,shield:false,capacitor:false,crit:false,boots:false,spear:false},lv:{spear:0,rift:0},cons:{grenade:0,wall:0,overclock:0,shock:0},auto:{item:'wall',trigger:'close'},
   px:0,perk:{start:0,memory:0,anchor:0,seed:0,train:0},best:0,cycles:0});
 function load(){
   const f=fresh();
   try{const s=JSON.parse(localStorage.getItem(SKEY));if(s&&s.guns&&s.level){
     for(const k in f.guns)s.guns[k]=Object.assign(f.guns[k],s.guns[k]);
-    s.gen=Object.assign(f.gen,s.gen);s.kit=Object.assign(f.kit,s.kit);s.cons=Object.assign(f.cons,s.cons);s.auto=Object.assign(f.auto,s.auto);s.perk=Object.assign(f.perk,s.perk);if(!s.best)s.best=Math.max(0,(s.level||1)-1);if(!GUNS[s.gun])s.gun='bolt';
+    s.gen=Object.assign(f.gen,s.gen);s.kit=Object.assign(f.kit,s.kit);s.cons=Object.assign(f.cons,s.cons);s.auto=Object.assign(f.auto,s.auto);s.perk=Object.assign(f.perk,s.perk);s.lv=Object.assign(f.lv,s.lv);if(!s.best)s.best=Math.max(0,(s.level||1)-1);if(!GUNS[s.gun])s.gun='bolt';
     return Object.assign(f,s);
   }}catch(e){}
   try{const o=JSON.parse(localStorage.getItem('sdr-rift-v4'));if(o&&o.up&&o.level){
@@ -296,9 +311,11 @@ function ground(x){
   const f=(x-G.x0)/S;let i=clamp(Math.floor(f),0,G.hs.length-2);const t=clamp(f-i,0,1),k=(1-Math.cos(t*Math.PI))/2;
   return G.hs[i]*(1-k)+G.hs[i+1]*k;
 }
-const progress=()=>clamp((G.L-G.px)/(G.L-PORTAL-10),0,1);
+// Wren stops at HOLDX and holds the line while Sync pries the crack (at PORTAL) open
+const HOLDX=PORTAL+70;
+const progress=()=>clamp((G.L-G.px)/(G.L-HOLDX),0,1);
 // one world px = 0.1 days of time walked back
-const daysLeft=x=>Math.max(0,Math.round((x-PORTAL-10)/10));
+const daysLeft=x=>Math.max(0,Math.round((x-HOLDX)/10));
 const fmtDays=d=>d<365?`${d} day${d===1?'':'s'}`:`${Math.floor(d/365)} yr ${d%365} d`;
 const fmtBack=d=>d<365?`−${d} d`:`−${Math.floor(d/365)} y ${d%365} d`;
 
@@ -310,8 +327,9 @@ function buildLevel(n){
   const flatI=Math.ceil((PORTAL+260-x0)/S);for(let i=0;i<flatI;i++)hs[i]=hs[flatI];
   G={n,L,x0,hs,px:L,camX:L-PSX,state:'shop',time:0,es:[],bolts:[],shards:[],parts:[],pickups:[],floats:[],rings:[],ghosts:[],cores:[],
      spawnAcc:0,queue:0,qT:0,s1:false,s2:false,wAcc:.55,tears:[],warned:false,queued:false,fireT:0,aim:-.08,press:false,drag:null,recoil:0,
-     shake:0,slow:0,banner:null,earned:0,kills:0,endT:0,pfade:0,dead:false,arcs:[],shield:!!save.kit.shield,inv:0,nades:[],walls:[],clocks:[],oc:0,mT:.5,mAim:0,mFlash:0,autoUsed:false};
-  for(let x=L-650;x>PORTAL+350;x-=600+r()*350)G.cores.push({x,alive:true,bob:r()*6});
+     shake:0,slow:0,banner:null,earned:0,kills:0,endT:0,pfade:0,dead:false,arcs:[],shield:!!save.kit.shield,inv:0,nades:[],walls:[],clocks:[],oc:0,mT:.5,mAim:0,mFlash:0,autoUsed:false,
+     holding:false,hold:0,opened:false,sync:{x:L-26,y:300},spear:0,spearT:0,spearCd:0,jabs:[]};
+  for(let x=L-650;x>PORTAL+350;x-=600+r()*350)G.cores.push({x,alive:true,bob:r()*6,pts:Array.from({length:7},()=>r()*2-1)});
   [920,1040,1160].forEach((sx,i)=>{const e=mkEnemy('drifter',G.camX+sx,'idle');e.delay=.6+i*.5;G.es.push(e)});
   renderLayers(n);
 }
@@ -437,7 +455,7 @@ function kill(e,vx,vy,crit){
 
 // ---------- combat ----------
 function shoulder(){return{x:G.px+2,y:ground(G.px)-58}}
-function mountPos(){return{x:G.px-2,y:ground(G.px)-92}}
+function mountPos(){return{x:G.sync.x+10,y:G.sync.y+8}}
 function muzzle(){const s=shoulder(),c=Math.cos(G.aim),n=Math.sin(G.aim),l=40-G.recoil;return{x:s.x+c*l+n*3,y:s.y+n*l-c*3}}
 function fire(){
   const arc=save.gun==='arc';
@@ -449,7 +467,6 @@ function fire(){
 }
 const centre=e=>e.type==='wraith'?{x:e.x,y:e.y}:{x:(e.P[1].x+e.P[2].x)/2,y:(e.P[1].y+e.P[2].y)/2};
 function findHit(b){
-  for(const c of G.cores){if(c.alive&&Math.hypot(b.x-c.x,b.y-c.y)<16)return{core:c}}
   for(const e of G.es){
     if(e.dead||e.phased||e.state==='idle'&&G.state!=='play')continue;
     if(e.type==='wraith'){if(Math.hypot(b.x-e.x,b.y-e.y)<=15*e.s)return{e,part:'body'};continue}
@@ -493,7 +510,7 @@ function stasisAt(x,y,base=2.8){
     if(Math.hypot(e.x-x,e.P[2].y-y)<175){e.frozen=dur;e.hp-=30;e.flash=.1;if(e.hp<=0)kill(e,(e.x-x)*3,-200,false)}
   }
 }
-function stasis(c){c.alive=false;stasisAt(c.x,ground(c.x)-34)}
+function stasis(c){c.alive=false;stasisAt(c.x,ground(c.x)-40)}
 function breakShield(){
   G.shield=false;G.inv=1.4;sfx.shield();
   const y=ground(G.px)-50;stasisAt(G.px,y);
@@ -551,13 +568,25 @@ function ghost(e){G.ghosts.push({P:e.P.map(p=>({...p})),e,t:.35})}
 const DODGE_CD=8,DODGE_DIST=90;
 function dodge(){
   if(G.state!=='play'||G.dodgeT>0)return;
-  const from=G.px,to=Math.max(PORTAL+10,G.px-DODGE_DIST),fy=ground(from);
+  const from=G.px,to=Math.max(G.holding?PORTAL+30:HOLDX,G.px-DODGE_DIST),fy=ground(from);
   for(let i=0;i<18;i++){const x=from+(to-from)*Math.random();G.parts.push({x,y:ground(x)-rand(8,80),vx:rand(30,90),vy:rand(-20,20),life:rand(.25,.5),size:rand(2,4),col:pick(['#5ef2ff','#e6fdff','#ffb347','#3a4566'])})}
   G.px=to;G.inv=Math.max(G.inv,.6);G.dodgeT=DODGE_CD;
   noise(.25,5000,.14,'highpass');tone(1400,.22,.07,'sine',300);
 }
 $('#dodge').addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();audioInit();dodge()});
 addEventListener('keydown',ev=>{if(ev.code==='Space'&&G.state==='play'){ev.preventDefault();dodge()}});
+const SPEAR_REFILL=6,SPEAR_RANGE=78;
+function jab(e){
+  G.spear--;G.spearCd=.3;
+  const c=centre(e),from={x:G.px+8,y:ground(G.px)-54};
+  G.jabs.push({x1:from.x,y1:from.y,x2:c.x,y2:c.y,t:.14});
+  noise(.08,1800,.18,'bandpass');tone(320,.1,.08,'square',140);G.shake=Math.max(G.shake,3);
+  damage(e,60*(1+.22*(G.n-1)),c.x,c.y,500,-60,false);
+  if(!e.dead){
+    if(e.type==='wraith'){e.diving=false;e.x+=110;e.y-=70}
+    else{e.x+=60;e.frozen=Math.max(e.frozen,.35)}
+  }
+}
 function lose(){
   if(G.state!=='play'||G.inv>0)return;
   if(G.shield){breakShield();return}
@@ -572,11 +601,50 @@ function update(dt){
   const playing=G.state==='play';
   G.time+=dt;
   if(playing){
-    G.px-=WALK*(save.kit.boots?1.15:1)*dt;
-    if(G.px<=PORTAL+10){G.px=PORTAL+10;G.state='ending';G.endT=1.6;sfx.rift();
-      for(const e of G.es)if(!e.dead){e.dead=true;shatter(e.P,[e.body,e.glow,'#5ef2ff'],300,-200,10)}}
+    if(!G.holding){
+      G.px-=WALK*(save.kit.boots?1.15:1)*dt;
+      if(G.px<=HOLDX){G.px=HOLDX;G.holding=true;G.banner={txt:'HOLD THE LINE',t:2.2};tone(260,.6,.12,'triangle',520)}
+    }else{
+      G.hold+=dt;
+      if(Math.random()<dt*30){const cy=ground(PORTAL)-92;G.parts.push({x:PORTAL+rand(-6,6),y:cy+rand(-60,60),vx:rand(-60,60),vy:rand(-80,20),life:rand(.3,.6),size:rand(2,3.5),col:pick(['#ffd36b','#ffb347','#fff2c4'])})}
+      if(G.hold>=lv('rift')){
+        G.opened=true;G.state='ending';G.endT=1.6;sfx.rift();G.shake=RM?0:8;
+        for(const e of G.es)if(!e.dead){e.dead=true;shatter(e.P,[e.body,e.glow,'#5ef2ff'],300,-200,10)}
+      }
+    }
   }
+  if(G.state==='ending')G.px+=(PORTAL-G.px)*Math.min(1,dt*5);
+  // spear: Zarya-style charges that refill one at a time; jabs fire on their own when something gets close
+  if(save.kit.spear){
+    const max=lv('spear');G.spearCd-=dt;
+    if(G.spear<max){G.spearT+=dt;if(G.spearT>=SPEAR_REFILL){G.spear++;G.spearT=0}}else G.spearT=0;
+    if(playing&&G.spear>0&&G.spearCd<=0){
+      const cy=ground(G.px)-50;let tgt=null,bd=1e9;
+      for(const e of G.es){
+        if(e.dead||e.phased||e.state!=='walk')continue;
+        const d=e.type==='wraith'?Math.hypot(e.x-G.px,e.y-cy):e.x-G.px;
+        if(d<SPEAR_RANGE&&d<bd){bd=d;tgt=e}
+      }
+      if(tgt)jab(tgt);
+    }
+  }
+  for(const j of G.jabs)j.t-=dt;G.jabs=G.jabs.filter(j=>j.t>0);
   G.camX=G.px-PSX;
+  // Sync: at the rift while it opens; otherwise guards the nearest stasis crack ahead of Wren, else stays at his shoulder
+  G.syncCore=null;
+  if(!G.holding&&G.state==='play'){let bd=1e9;for(const c of G.cores)if(c.alive&&c.x>G.px+60&&c.x<G.camX+W-60&&c.x<bd){bd=c.x;G.syncCore=c}}
+  {const s=G.sync,at=G.holding&&!G.opened,c=G.syncCore;
+   const tx=at?PORTAL+8:c?c.x:G.px-26,ty=at?ground(PORTAL)-96+Math.sin(G.time*9)*2:c?ground(c.x)-92+Math.sin(G.time*3)*4:ground(G.px)-122+Math.sin(G.time*2.2)*5;
+   const k=Math.min(1,dt*(at||c?3:5));s.x+=(tx-s.x)*k;s.y+=(ty-s.y)*k;
+   if(c&&playing&&Math.hypot(s.x-c.x,s.y-ty)<30){
+     const cy=ground(c.x)-28;
+     for(const e of G.es){
+       if(e.dead||e.phased||e.state!=='walk')continue;
+       if(e.type==='wraith'?Math.hypot(e.x-c.x,e.y-cy)<34:Math.abs(e.x-c.x)<14*e.s+6){
+         G.jabs.push({x1:s.x,y1:s.y,x2:c.x,y2:cy,t:.14,c:'zap'});stasis(c);break;
+       }
+     }
+   }}
   G.inv-=dt;for(const a of G.arcs)a.t-=dt;G.arcs=G.arcs.filter(a=>a.t>0);
   G.oc=Math.max(0,G.oc-dt);G.dodgeT=Math.max(0,(G.dodgeT||0)-dt);
   for(const n of G.nades){
@@ -614,7 +682,7 @@ function update(dt){
 
   if(playing){
     const prog=progress();
-    G.spawnAcc+=dt*(.42+.12*(G.n-1)+.5*prog);
+    G.spawnAcc+=dt*(.42+.12*(G.n-1)+.5*prog)*(G.holding?1.5:1);
     if(G.spawnAcc>=1){G.spawnAcc-=1;spawn(pickType())}
     if(prog>.5)autoFire('half');
     if(G.es.some(e=>!e.dead&&e.state==='walk'&&!e.phased&&(e.type==='wraith'?Math.hypot(e.x-G.px,e.y-ground(G.px)+50)<80:e.x-G.px<80)))autoFire('close');
@@ -786,15 +854,6 @@ function drawPlayer(){
   ctx.fillStyle=hood;ctx.beginPath();ctx.arc(x+1,fy-75,9.5,0,7);ctx.fill();
   ctx.fillStyle='#ffb347';ctx.fillRect(x+2,fy-77,9,3);
   ctx.fillStyle='rgba(255,179,71,.35)';ctx.fillRect(x+2,fy-79,11,7);
-  if(save.kit.mount){
-    const m=mountPos();
-    seg({x:x-6,y:fy-62},{x:x-10,y:fy-80},4,'#3a4566');seg({x:x-10,y:fy-80},m,4,'#3a4566');
-    ctx.save();ctx.translate(m.x,m.y);ctx.rotate(G.mAim);
-    ctx.fillStyle='#2c3350';ctx.fillRect(-2,-4,24,6);ctx.fillRect(0,1,4,5);
-    ctx.fillStyle='#ffb347';ctx.fillRect(3,-3,12,1.5);
-    if(G.mFlash>0){ctx.beginPath();ctx.moveTo(22,-6);ctx.lineTo(32,-1);ctx.lineTo(22,3);ctx.fill()}
-    ctx.restore();
-  }
   if(G.oc>0){
     const a=Math.min(1,G.oc)*.22;
     const g=ctx.createRadialGradient(x+2,fy-46,4,x+2,fy-46,48);g.addColorStop(0,`rgba(255,179,71,${a})`);g.addColorStop(1,'rgba(255,179,71,0)');
@@ -820,7 +879,51 @@ function drawPlayer(){
   }
   ctx.restore();
 }
+function drawSync(){
+  const s=G.sync,at=G.holding&&!G.opened,work=at&&Math.hypot(s.x-PORTAL-8,s.y-(ground(PORTAL)-96))<30;
+  if(G.dead)return;
+  ctx.save();
+  if(G.pfade>0)ctx.globalAlpha=1-G.pfade;
+  if(work){
+    const cy=ground(PORTAL)-92;
+    for(let i=0;i<3;i++){ctx.strokeStyle=`rgba(255,211,107,${.35+.3*Math.random()})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(PORTAL+rand(-4,4),cy+rand(-50,50));ctx.stroke()}
+  }
+  if(save.kit.mount){
+    ctx.save();ctx.translate(s.x+10,s.y+8);ctx.rotate(G.mAim);
+    ctx.fillStyle='#2c3350';ctx.fillRect(-2,-3,22,5);
+    ctx.fillStyle='#ffb347';ctx.fillRect(3,-2,10,1.3);
+    if(G.mFlash>0){ctx.beginPath();ctx.moveTo(20,-5);ctx.lineTo(29,-.5);ctx.lineTo(20,3);ctx.fill()}
+    ctx.restore();
+  }
+  ctx.translate(s.x,s.y);
+  const spread=work?4+Math.sin(G.time*14)*1.5:1.5,spin=G.time*(work?3:1);
+  ctx.fillStyle='rgba(94,242,255,.16)';ctx.beginPath();ctx.arc(0,0,15,0,7);ctx.fill();
+  for(let i=0;i<4;i++){
+    const a=spin+i*Math.PI/2;ctx.save();ctx.rotate(a);ctx.translate(spread,0);
+    ctx.fillStyle=i%2?'#d9dcef':'#eef0fb';ctx.beginPath();ctx.moveTo(2,-7);ctx.lineTo(11,0);ctx.lineTo(2,7);ctx.closePath();ctx.fill();
+    ctx.restore();
+  }
+  ctx.fillStyle='#16233a';ctx.beginPath();ctx.arc(0,0,5.5,0,7);ctx.fill();
+  ctx.fillStyle=work?'#ffd36b':'#5ef2ff';ctx.beginPath();ctx.arc(1,0,3,0,7);ctx.fill();
+  ctx.restore();
+}
+function drawCrack(){
+  const sx=PORTAL,cy=ground(PORTAL)-92;
+  if(sx-G.camX<-120||sx-G.camX>W+120)return;
+  const f=G.holding?Math.min(1,G.hold/lv('rift')):0,h=70+30*f,w=2+16*f;
+  if(!G.cpts){const p=[];for(let i=0;i<=10;i++)p.push(rand(-1,1));G.cpts=p}
+  ctx.save();ctx.translate(sx,cy);
+  const glow=ctx.createRadialGradient(0,0,2,0,0,60+40*f);glow.addColorStop(0,`rgba(255,211,107,${.25+.4*f})`);glow.addColorStop(1,'rgba(255,211,107,0)');
+  ctx.fillStyle=glow;ctx.save();ctx.scale(.5,1);ctx.beginPath();ctx.arc(0,0,60+40*f,0,7);ctx.fill();ctx.restore();
+  const left=[],right=[];
+  G.cpts.forEach((o,i)=>{const y=-h+i*(2*h/10),taper=Math.sin(i/10*Math.PI),x=o*6;left.push({x:x-w*taper,y});right.push({x:x+w*taper,y})});
+  ctx.fillStyle=f>0?'#fff4cf':'rgba(255,224,150,.8)';ctx.beginPath();left.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));for(let i=right.length-1;i>=0;i--)ctx.lineTo(right[i].x,right[i].y);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#ffb347';ctx.lineWidth=2;ctx.beginPath();G.cpts.forEach((o,i)=>{const y=-h+i*(2*h/10);i?ctx.lineTo(o*6,y):ctx.moveTo(o*6,y)});ctx.stroke();
+  if(G.holding){ctx.strokeStyle='rgba(255,211,107,.9)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,-h-22,9,-Math.PI/2,-Math.PI/2+f*Math.PI*2);ctx.stroke()}
+  ctx.restore();
+}
 function drawPortal(){
+  if(!G.opened){drawCrack();return}
   const sx=PORTAL,cy=ground(PORTAL)-92;
   if(sx-G.camX<-120||sx-G.camX>W+120)return;
   ctx.save();ctx.translate(sx,cy);
@@ -860,11 +963,15 @@ function render(){
   }
   for(const c of G.cores){
     if(!c.alive||c.x<xa-30||c.x>xb+30)continue;
-    const y=ground(c.x)-34+Math.sin(G.time*2+c.bob)*4;c.y=y;
-    ctx.fillStyle='rgba(127,212,255,.18)';ctx.beginPath();ctx.arc(c.x,y,22+Math.sin(G.time*4)*3,0,7);ctx.fill();
-    ctx.save();ctx.translate(c.x,y);ctx.rotate(G.time*.8);ctx.fillStyle='#7fd4ff';ctx.beginPath();ctx.moveTo(0,-14);ctx.lineTo(10,0);ctx.lineTo(0,14);ctx.lineTo(-10,0);ctx.closePath();ctx.fill();
-    ctx.strokeStyle='#e6fdff';ctx.lineWidth=1.5;ctx.stroke();ctx.restore();
-    ctx.fillStyle='rgba(127,212,255,.4)';ctx.fillRect(c.x-1,y+16,2,ground(c.x)-y-16);
+    // a small frost-blue crack in time standing on the ground: tall, jagged and still, unlike the spinning anomaly pickups
+    const gy=ground(c.x),h=48,base=gy-4,guard=G.syncCore===c,pulse=.5+.5*Math.sin(G.time*3+c.bob);
+    const glow=ctx.createRadialGradient(c.x,base-h/2,2,c.x,base-h/2,38);glow.addColorStop(0,`rgba(191,230,255,${.22+.12*pulse+(guard?.15:0)})`);glow.addColorStop(1,'rgba(191,230,255,0)');
+    ctx.fillStyle=glow;ctx.beginPath();ctx.arc(c.x,base-h/2,38,0,7);ctx.fill();
+    const L=[],R=[];c.pts.forEach((o,i)=>{const y=base-i*h/6,t=Math.sin(i/6*Math.PI),x=c.x+o*4;L.push([x-4*t,y]);R.push([x+4*t,y])});
+    ctx.fillStyle='#eaf7ff';ctx.beginPath();L.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));for(let i=R.length-1;i>=0;i--)ctx.lineTo(R[i][0],R[i][1]);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#7fd4ff';ctx.lineWidth=1.5;ctx.beginPath();c.pts.forEach((o,i)=>{const y=base-i*h/6;i?ctx.lineTo(c.x+o*4,y):ctx.moveTo(c.x+o*4,y)});ctx.stroke();
+    ctx.strokeStyle='rgba(127,212,255,.5)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(c.x-10,gy);ctx.lineTo(c.x+10,gy);ctx.stroke();
+    if(guard){ctx.strokeStyle='rgba(191,230,255,.35)';ctx.setLineDash([3,5]);ctx.beginPath();ctx.moveTo(G.sync.x,G.sync.y+8);ctx.lineTo(c.x,base-h);ctx.stroke();ctx.setLineDash([])}
   }
   for(const p of G.pickups){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(G.time*3+p.v);ctx.fillStyle='#5ef2ff';ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(4,0);ctx.lineTo(0,6);ctx.lineTo(-4,0);ctx.closePath();ctx.fill();ctx.restore()}
   for(const w of G.walls){
@@ -885,6 +992,7 @@ function render(){
   for(const g of G.ghosts)drawEcho(g.e,g.P,g.t/.35*.5);
   for(const e of G.es)drawEcho(e,e.P,1);
   drawPlayer();
+  drawSync();
   for(const s of G.shards){ctx.globalAlpha=Math.min(1,s.life*1.4);ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.a);ctx.fillStyle=s.col;ctx.beginPath();ctx.moveTo(-s.size/2,s.size/3);ctx.lineTo(s.size/2,s.size/2);ctx.lineTo(0,-s.size/2);ctx.closePath();ctx.fill();ctx.restore()}
   ctx.globalAlpha=1;
   if(G.state==='play'&&G.fireT>0){
@@ -897,6 +1005,18 @@ function render(){
     const ex=m.x+dx*len,ey=m.y+dy*len;
     ctx.save();ctx.setLineDash([3,7]);ctx.strokeStyle='rgba(255,179,71,.55)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(m.x,m.y);ctx.lineTo(ex,ey);ctx.stroke();ctx.restore();
     ctx.fillStyle='rgba(255,179,71,.8)';ctx.beginPath();ctx.arc(ex,ey,2.5,0,7);ctx.fill();
+  }
+  for(const j of G.jabs){
+    const k=j.t/.14,a=Math.atan2(j.y2-j.y1,j.x2-j.x1);
+    if(j.c==='zap'){
+      if(!j.z)j.z=zigzag({x:j.x1,y:j.y1},{x:j.x2,y:j.y2});
+      for(const[w,c]of[[6,`rgba(127,212,255,${.35*k})`],[2,`rgba(234,247,255,${k})`]]){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.lineJoin='round';ctx.beginPath();j.z.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke()}
+      continue;
+    }
+    seg({x:j.x1,y:j.y1},{x:j.x2,y:j.y2},4,`rgba(255,179,71,${.35*k})`);
+    seg({x:j.x1,y:j.y1},{x:j.x2,y:j.y2},2,`rgba(255,242,196,${k})`);
+    ctx.save();ctx.translate(j.x2,j.y2);ctx.rotate(a);ctx.globalAlpha=k;ctx.fillStyle='#fff2c4';
+    ctx.beginPath();ctx.moveTo(6,0);ctx.lineTo(-6,-5);ctx.lineTo(-3,0);ctx.lineTo(-6,5);ctx.closePath();ctx.fill();ctx.restore();
   }
   for(const b of G.bolts){
     if(b.arc){const t={x:b.x-b.vx*.025,y:b.y-b.vy*.025},z=zigzag(t,b);
@@ -941,7 +1061,7 @@ function render(){
 }
 
 // ---------- HUD + UI ----------
-const hudEls={done:$('#trip .done'),m:$('#tripM'),l:$('#tripL'),c:$('#chronN'),a:$('#ancN'),p:$('#pxN'),ph:$('#pxHud')};
+const hudEls={done:$('#trip .done'),m:$('#tripM'),s:$('#tripS'),l:$('#tripL'),c:$('#chronN'),a:$('#ancN'),p:$('#pxN'),ph:$('#pxHud')};
 const last={};
 function setText(el,k,v){if(last[k]!==v){last[k]=v;el.textContent=v}}
 const dEl=$('#dodge'),dN=$('#dodgeN');
@@ -950,8 +1070,14 @@ function hud(){
   dEl.classList.toggle('cool',cd>0);dEl.style.setProperty('--p',cd>0?(1-cd/DODGE_CD).toFixed(3):'0');
   setText(dN,'dn',cd>0?String(Math.ceil(cd)):'');
   if(G.state!=='play'&&!dEl.hidden&&G.state!=='shop')dEl.hidden=true;
-  hudEls.done.style.width=(progress()*100).toFixed(1)+'%';
-  setText(hudEls.m,'m',fmtDays(daysLeft(G.px)));
+  const sp=$('#spearPips'),show=save.kit.spear&&!dEl.hidden;sp.hidden=!show;
+  if(show){const max=lv('spear'),key=G.spear+'/'+max+'/'+Math.floor(G.spearT*10);
+    if(last.sp!==key){last.sp=key;sp.innerHTML=Array.from({length:max},(_,i)=>i<G.spear?'<i class="on"></i>':i===G.spear?`<i><b style="width:${(G.spearT/SPEAR_REFILL*100).toFixed(0)}%"></b></i>`:'<i></i>').join('')}}
+  const hf=G.holding?Math.min(1,G.hold/lv('rift')):0;
+  hudEls.done.style.width=((G.holding?hf:progress())*100).toFixed(1)+'%';
+  hudEls.done.classList.toggle('gold',G.holding);
+  setText(hudEls.m,'m',G.holding?(G.opened?'Rift open':`Sync is opening the rift · ${Math.round(hf*100)}%`):fmtDays(daysLeft(G.px)));
+  hudEls.s.hidden=G.holding;
   setText(hudEls.l,'l','Rift '+G.n);
   setText(hudEls.c,'c',String(save.coins));
   setText(hudEls.a,'a',String(save.anchors));
@@ -971,7 +1097,9 @@ const ICON={
   wall:ic('<path d="M4 6h20v18H4zM4 12h20M4 18h20M10 6v6M18 6v6M14 12v6M8 18v6M20 18v6"/>'),
   overclock:ic('<path d="M5 21a10 10 0 1 1 18 0"/><path d="M14 18l5-7"/><circle cx="14" cy="18" r="1.6"/>'),
   shock:ic('<path d="M6 14h3M11 8a8 8 0 0 1 0 12M15 5a12 12 0 0 1 0 18M19 3a15 15 0 0 1 0 22"/>'),
-  mount:ic('<path d="M6 25V15l6-6h12M14 9V6M18 9h5"/><circle cx="6" cy="25" r="1.5"/>'),
+  mount:ic('<path d="M6 12l5-5 5 5-5 5z"/><circle cx="11" cy="12" r="1.3"/><path d="M15 12h10M19 9v6"/>'),
+  spear:ic('<path d="M4 24 20 8"/><path d="M18 5l5 0 0 5-5 3-3-3z"/><path d="M7 18l3 3"/>'),
+  rift:ic('<path d="M14 2l-3 6 4 4-5 5 4 4-2 5"/><path d="M8 9l-3 2M20 12l3-2M9 20l-3 1"/>'),
   auto:ic('<rect x="5" y="9" width="18" height="14" rx="1"/><path d="M14 9V4M10 4h8M10 16l3 3 5-6"/>'),
   capacitor:ic('<path d="M9 5v18M19 5v18M3 14h6M19 14h6"/><path d="M12 10l4 4-4 4"/>'),
   crit:ic('<circle cx="14" cy="14" r="9"/><circle cx="14" cy="14" r="3" fill="#ffb347" stroke="#ffb347"/><path d="M14 2v4M14 22v4M2 14h4M22 14h4"/>'),
@@ -990,29 +1118,40 @@ Object.assign(ICON,{
   p_seed:ic('<path d="M14 25V12"/><path d="M14 14c-6 0-8-4-8-8 6 0 8 4 8 8zM14 12c0-5 3-8 8-8 0 5-3 8-8 8z"/>'),
   p_train:ic('<circle cx="14" cy="14" r="10"/><circle cx="14" cy="14" r="5"/><path d="M14 2v4M14 22v4M2 14h4M22 14h4"/>'),
 });
-function upRow(key,name,def,lv,act){
-  const cost=def.cost[lv],v=def.vals;
+function upRow(key,name,def,lv,act,cur='a'){
+  const cost=def.cost[lv],v=def.vals,sp=cur==='s',have=sp?save.anchors:save.coins;
   const val=def.fmt(v[lv])+(cost!==undefined?` <em>→ ${def.fmt(v[lv+1]).split(' ')[0]}</em>`:'');
   const btn=cost===undefined?`<button class="buy ghost" type="button" disabled>Maxed</button>`
-    :`<button class="buy" type="button" data-act="${act}" aria-label="Upgrade ${name} for ${cost} chronons" ${save.coins>=cost?'':'disabled'}>${CHRON}${cost}</button>`;
+    :`<button class="buy${sp?' anc':''}" type="button" data-act="${act}" aria-label="Upgrade ${name} for ${cost} ${sp?'sparks':'anomalies'}" ${have>=cost?'':'disabled'}>${sp?ANC:CHRON}${cost}</button>`;
   return `<div class="up"><div class="ico">${ICON[key]}</div><div class="txt"><b>${name}</b><span class="val">${val}</span><div class="ticks">${v.map((_,i)=>`<i class="${i<=lv?'on':''}"></i>`).join('')}</div></div>${btn}</div>`;
 }
+function kitRow(k){
+  const d=KIT[k],own=save.kit[k];
+  if(k==='spear'&&own)return upRow('spear',LV.spear.name,LV.spear,save.lv.spear,'lv:spear',LV.spear.cur);
+  const cfg=k==='auto'&&own?`<div class="cfg">Use <select id="autoItem" aria-label="Consumable to deploy">${Object.entries(CONS).map(([c,v])=>`<option value="${c}"${save.auto.item===c?' selected':''}>${v.name}</option>`).join('')}</select> when <select id="autoTrig" aria-label="Trigger">${Object.entries(TRIG).map(([t,v])=>`<option value="${t}"${save.auto.trigger===t?' selected':''}>${v}</option>`).join('')}</select></div>`:'';
+  return `<div class="up"><div class="ico">${ICON[k]}</div><div class="txt"><b>${d.name}</b><span class="val">${d.blurb}</span>${cfg}</div>${own?`<button class="buy ghost" type="button" disabled>Owned</button>`:`<button class="buy anc" type="button" data-act="kit:${k}" aria-label="Buy ${d.name} for ${d.cost} sparks" ${save.anchors>=d.cost?'':'disabled'}>${ANC}${d.cost}</button>`}</div>`;
+}
+const kitDotFor=tab=>Object.keys(KIT).some(k=>KIT[k].tab===tab&&!save.kit[k]&&save.anchors>=KIT[k].cost);
 function gunStats(k){const u=GUNS[k].ups,l=save.guns[k];return `${u.power.vals[l.power]} dmg · ${u.rate.vals[l.rate].toFixed(2)} s`+(u.chain?` · ${u.chain.vals[l.chain]} jump${u.chain.vals[l.chain]>1?'s':''}`:'')}
 function renderShop(){
   $('#shopT').textContent='Rift '+G.n;
-  $('#shopSub').textContent=`The rift is ${fmtDays(daysLeft(G.L))} back. Clear it to earn ${G.n+1} anchors for weapons and kit.`;
+  $('#shopSub').textContent=`The rift is ${fmtDays(daysLeft(G.L))} back. Clear it to earn ${G.n+1+perk('anchor')} sparks for weapons, gear and Sync.`;
   const gunDot=Object.keys(GUNS).some(k=>!save.guns[k].owned&&save.anchors>=GUNS[k].unlock);
-  const kitDot=Object.keys(KIT).some(k=>!save.kit[k]&&save.anchors>=KIT[k].cost);
   document.querySelectorAll('#seg button').forEach(b=>{
     const t=b.dataset.tab;b.setAttribute('aria-selected',String(t===shopTab));
     b.querySelector('.dot')?.remove();
-    if((t==='gun'&&gunDot)||(t==='kit'&&kitDot))b.insertAdjacentHTML('beforeend','<span class="dot" aria-label="Something new is affordable"></span>');
+    if((t==='gun'&&gunDot)||((t==='gear'||t==='sync')&&kitDotFor(t)))b.insertAdjacentHTML('beforeend','<span class="dot" aria-label="Something new is affordable"></span>');
   });
   let h='';
   if(shopTab==='up'){
     const g=save.gun;
     h+=`<p class="lbl">${GUNS[g].name}</p>`+Object.entries(GUNS[g].ups).map(([k,d])=>upRow(k,d.name,d,save.guns[g][k],`gun:${g}:${k}`)).join('');
-    h+=`<p class="lbl">All weapons</p>`+Object.entries(GEN).map(([k,d])=>upRow(k,d.name,d,save.gen[k],`gen:${k}`)).join('');
+    h+=`<p class="note">Sight and Anomaly Collector are in Gear. Switch weapons in Weapons.</p>`;
+  }else if(shopTab==='gear'){
+    h=kitRow('shield')+kitRow('spear')+upRow('sight',GEN.sight.name,GEN.sight,save.gen.sight,'gen:sight')
+      +upRow('salvage',GEN.salvage.name,GEN.salvage,save.gen.salvage,'gen:salvage')+kitRow('boots');
+  }else if(shopTab==='sync'){
+    h=kitRow('mount')+kitRow('auto')+kitRow('capacitor')+kitRow('crit')+upRow('rift',LV.rift.name,LV.rift,save.lv.rift,'lv:rift',LV.rift.cur);
   }else if(shopTab==='gun'){
     h='<div class="guns">'+Object.entries(GUNS).map(([k,d])=>{
       const own=save.guns[k].owned,eq=save.gun===k;
@@ -1023,7 +1162,7 @@ function renderShop(){
     }).join('')+'</div>';
   }else if(shopTab==='px'){
     const gain=save.level-1,armed=Date.now()-resetArm<4000;
-    h=`<div class="reset"><div><b>Start over · +${gain} paradox</b><span>${gain?`Back to rift 1. Chronons, anchors, upgrades, weapons, kit and consumables are wiped. Paradox perks stay. Best ever: rift ${Math.max(save.best,gain)}.`:'Clear at least one rift this cycle to earn paradox from starting over.'}</span></div><button class="buy red${armed?' armed':''}" type="button" data-act="reset" ${gain?'':'disabled'}>${armed?'Tap to confirm':'Start over'}</button></div>`;
+    h=`<div class="reset"><div><b>Start over · +${gain} paradox</b><span>${gain?`Back to rift 1. Anomalies, sparks, upgrades, weapons, gear, Sync upgrades and consumables are wiped. Paradox perks stay. Best ever: rift ${Math.max(save.best,gain)}.`:'Clear at least one rift this cycle to earn paradox from starting over.'}</span></div><button class="buy red${armed?' armed':''}" type="button" data-act="reset" ${gain?'':'disabled'}>${armed?'Tap to confirm':'Start over'}</button></div>`;
     h+=Object.entries(PERKS).map(([k,d])=>{
       const lv=save.perk[k],cost=d.cost[lv],v=d.vals;
       const btn=cost===undefined?`<button class="buy ghost" type="button" disabled>Maxed</button>`
@@ -1034,15 +1173,9 @@ function renderShop(){
     h=Object.entries(CONS).map(([k,d])=>{
       const n=save.cons[k],full=n>=CONS_MAX;
       const btn=full?`<button class="buy ghost" type="button" disabled>Full</button>`
-        :`<button class="buy" type="button" data-act="cons:${k}" aria-label="Buy one ${d.name} for ${d.cost} chronons" ${save.coins>=d.cost?'':'disabled'}>${CHRON}${d.cost}</button>`;
+        :`<button class="buy" type="button" data-act="cons:${k}" aria-label="Buy one ${d.name} for ${d.cost} anomalies" ${save.coins>=d.cost?'':'disabled'}>${CHRON}${d.cost}</button>`;
       return `<div class="up"><div class="ico">${ICON[k]}</div><div class="txt"><b>${d.name} <span class="carry">${n}/${CONS_MAX}</span></b><span class="val">${d.blurb}</span></div>${btn}</div>`;
     }).join('')+`<p class="note">Used up when you use them. Press 1–4 or tap the buttons at the bottom of the screen during a run.</p>`;
-  }else{
-    h=Object.entries(KIT).map(([k,d])=>{
-      const own=save.kit[k];
-      const cfg=k==='auto'&&own?`<div class="cfg">Use <select id="autoItem" aria-label="Consumable to deploy">${Object.entries(CONS).map(([c,v])=>`<option value="${c}"${save.auto.item===c?' selected':''}>${v.name}</option>`).join('')}</select> when <select id="autoTrig" aria-label="Trigger">${Object.entries(TRIG).map(([t,v])=>`<option value="${t}"${save.auto.trigger===t?' selected':''}>${v}</option>`).join('')}</select></div>`:'';
-      return `<div class="up"><div class="ico">${ICON[k]}</div><div class="txt"><b>${d.name}</b><span class="val">${d.blurb}</span>${cfg}</div>${own?`<button class="buy ghost" type="button" disabled>Owned</button>`:`<button class="buy anc" type="button" data-act="kit:${k}" aria-label="Buy ${d.name} for ${d.cost} anchors" ${save.anchors>=d.cost?'':'disabled'}>${ANC}${d.cost}</button>`}</div>`;
-    }).join('');
   }
   $('#pane').innerHTML=h;
   hud();
@@ -1061,7 +1194,10 @@ $('#shop').addEventListener('click',ev=>{
   else if(a==='equip')save.gun=k;
   else if(a==='gun'){const d=GUNS[k].ups[s],c=d.cost[save.guns[k][s]];if(c===undefined||save.coins<c)return;save.coins-=c;save.guns[k][s]++}
   else if(a==='gen'){const c=GEN[k].cost[save.gen[k]];if(c===undefined||save.coins<c)return;save.coins-=c;save.gen[k]++}
-  else if(a==='kit'){if(save.anchors<KIT[k].cost)return;save.anchors-=KIT[k].cost;save.kit[k]=true;G.shield=true}
+  else if(a==='kit'){if(save.anchors<KIT[k].cost)return;save.anchors-=KIT[k].cost;save.kit[k]=true;G.shield=!!save.kit.shield}
+  else if(a==='lv'){const d=LV[k],c=d.cost[save.lv[k]];if(c===undefined)return;
+    if(d.cur==='s'){if(save.anchors<c)return;save.anchors-=c}else{if(save.coins<c)return;save.coins-=c}
+    save.lv[k]++}
   else if(a==='cons'){if(save.coins<CONS[k].cost||save.cons[k]>=CONS_MAX)return;save.coins-=CONS[k].cost;save.cons[k]++}
   else if(a==='perk'){const c=PERKS[k].cost[save.perk[k]];if(c===undefined||save.px<c)return;save.px-=c;save.perk[k]++;
     if(k==='start')save.coins+=PERKS.start.vals[save.perk[k]]-PERKS.start.vals[save.perk[k]-1];
@@ -1074,7 +1210,7 @@ $('#shop').addEventListener('click',ev=>{
   persist();sfx.buy();renderShop();
 });
 function enterShop(){G.state='shop';shopTab='up';$('#shop').hidden=false;$('#msg').hidden=true;$('#cbar').hidden=true;$('#dodge').hidden=true;renderShop()}
-$('#go').addEventListener('click',()=>{audioInit();$('#shop').hidden=true;G.state='play';G.time=0;renderCbar();$('#cbar').hidden=!Object.values(save.cons).some(n=>n>0);$('#dodge').hidden=false});
+$('#go').addEventListener('click',()=>{audioInit();$('#shop').hidden=true;G.state='play';G.time=0;G.spear=save.kit.spear?lv('spear'):0;renderCbar();$('#cbar').hidden=!Object.values(save.cons).some(n=>n>0);$('#dodge').hidden=false});
 function showMsg(eyebrow,title,rows,go,onGo,alt){
   $('#msgE').textContent=eyebrow;$('#msgT').textContent=title;$('#msgB').innerHTML=rows;
   const b=$('#msgGo');b.textContent=go;b.onclick=onGo;
@@ -1085,7 +1221,7 @@ function showClear(){
   const anc=G.n+1+perk('anchor');
   save.anchors+=anc;save.level=G.n+1;save.best=Math.max(save.best,G.n);persist();
   showMsg(`Rift ${G.n} reached`,'Through the rift',
-    `<div>Echoes shattered<b>${G.kills}</b></div><div>Chronons collected<b>+${G.earned}</b></div><div class="ancrow">Anchors earned<b>+${anc}</b></div><p>Spend anchors on new guns and kit in the loadout.</p>`,
+    `<div>Echoes shattered<b>${G.kills}</b></div><div>Anomalies collected<b>+${G.earned}</b></div><div class="ancrow">Sparks earned<b>+${anc}</b></div><p>Spend sparks on weapons, gear and Sync upgrades in the loadout.</p>`,
     'Next rift',()=>{buildLevel(save.level);enterShop()},false);
 }
 function showDead(){
@@ -1093,7 +1229,7 @@ function showDead(){
   const pct=Math.round(progress()*100),dist=Math.round(progress()*(20+8*(G.n-1))*salv());
   save.coins+=dist;persist();
   showMsg(`Rift ${G.n} · ${pct}% of the way`,'Erased',
-    `<div>Chronons collected<b>+${G.earned}</b></div><div>Distance bonus (${pct}%)<b>+${dist}</b></div><p>An echo caught you ${fmtDays(daysLeft(G.px))} short of the rift. Everything you earned is yours to keep.</p>`,
+    `<div>Anomalies collected<b>+${G.earned}</b></div><div>Distance bonus (${pct}%)<b>+${dist}</b></div><p>An echo caught you ${fmtDays(daysLeft(G.px))} short of the rift. Everything you earned is yours to keep.</p>`,
     'Try again',()=>{buildLevel(G.n);enterShop()},false);
 }
 function startOver(){

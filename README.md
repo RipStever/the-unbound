@@ -1,6 +1,6 @@
 # The Unbound
 
-A side-on action game. Time has broken, and Wren walks backward through it, back in time toward the rift where her sister Sol was lost, holding off the artifacts of fractured time that keep pouring out of the collapse.
+A side-on action game. Time has broken, and Wren walks backward through it, back in time toward the rift where his sister Sol was lost, holding off the artifacts of fractured time that keep pouring out of the collapse.
 
 ## Play
 
@@ -16,9 +16,11 @@ Progress saves to the browser's local storage.
 
 | Currency | Earned from | Spent on |
 |---|---|---|
-| Chronons | Kills and distance reached | Gun upgrades, Sight, Salvage, consumables |
-| Anchors | Clearing a rift | Weapons and kit |
+| Anomalies | Kills and distance reached | Gun upgrades, Sight, Anomaly Collector, Spear charges, consumables |
+| Sparks | Clearing a rift | Weapons, gear and Sync upgrades |
 | Paradox | Starting over (1 per rift cleared that cycle) | Permanent perks |
+
+At the end of each rift, Wren stops at a golden crack and holds the line while his companion Sync pries it open.
 
 ## Files
 
