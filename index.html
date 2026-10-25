@@ -45,7 +45,7 @@ body{height:100%;margin:0;box-sizing:border-box;background:var(--bg);color:var(-
 .up .val{font-family:var(--body);font-size:13px;color:var(--dim)}
 .up .val em{font-style:normal;color:var(--amber)}
 .ticks{display:flex;gap:4px;margin-top:3px}
-.ticks i{width:16px;height:4px;background:rgba(255,255,255,.14)}
+.ticks i{width:12px;height:4px;background:rgba(255,255,255,.14)}
 .ticks i.on{background:var(--line);box-shadow:0 0 6px rgba(94,242,255,.6)}
 .buy{min-width:96px;font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.06em;color:var(--bg);background:var(--amber);border:0;padding:9px 12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;
   clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
@@ -183,17 +183,18 @@ const clamp=(v,a,b)=>v<a?a:v>b?b:v, rand=(a,b)=>a+Math.random()*(b-a), pick=a=>a
 function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 
 // ---------- progression ----------
-const FIRE=[.8,.66,.55,.46,.39,.33,.28,.24];
-const COST=[10,30,70,150,300,550,900];
+const FIRE=[.8,.75,.7,.65,.61,.57,.53,.49,.46,.43,.4,.37,.35,.33,.31];
+// 15 levels each for power and fire rate; costs climb ~30% per step so the long tail stays reachable
+const COST=[8,16,28,44,65,90,120,160,210,280,370,480,620,800];
 const SIGHT=[90,160,240,330,430,560,720,900];
-const ARCFIRE=[1.05,.9,.77,.66,.57,.49,.42,.36];
+const ARCFIRE=[1.05,.98,.92,.86,.8,.75,.7,.65,.61,.57,.53,.5,.47,.44,.41];
 const GUNS={
   bolt:{name:'Bolt pistol',unlock:0,col:'#ffb347',blurb:'Single bolts. Headshots crit for 2.5x damage.',ups:{
-    power:{name:'Bolt power',vals:[14,18,23,29,36,45,56,70],cost:COST,fmt:v=>v+' damage per bolt'},
+    power:{name:'Bolt power',vals:[14,17,20,24,28,32,37,42,47,52,58,64,70,77,85],cost:COST,fmt:v=>v+' damage per bolt'},
     rate:{name:'Fire rate',vals:FIRE,cost:COST,fmt:v=>v.toFixed(2)+' s between shots'},
   }},
   arc:{name:'Arc gun',unlock:5,col:'#5ef2ff',blurb:'Lightning that jumps between nearby echoes. No headshot crits.',ups:{
-    power:{name:'Arc power',vals:[13,16,20,25,31,38,47,58],cost:COST,fmt:v=>v+' damage per strike'},
+    power:{name:'Arc power',vals:[13,15,18,21,25,29,33,38,42,47,52,57,63,69,75],cost:COST,fmt:v=>v+' damage per strike'},
     rate:{name:'Fire rate',vals:ARCFIRE,cost:COST,fmt:v=>v.toFixed(2)+' s between shots'},
     chain:{name:'Chain',vals:[1,2,3,4,5,6,7,8],cost:[30,80,180,350,600,950,1400],fmt:v=>v+' extra '+(v>1?'echoes':'echo')+' hit per shot'},
   }},
@@ -207,6 +208,7 @@ const KIT={
   shield:{tab:'gear',name:'Phase shield',cost:3,blurb:'Takes one hit per run, then breaks in a stasis burst that freezes everything near you.'},
   spear:{tab:'gear',name:'Spear',cost:4,blurb:'Wren jabs anything that gets close, automatically. Works on charges that refill one at a time.'},
   boots:{tab:'gear',name:'Chrono boots',cost:5,blurb:'You walk back 15% faster, so you reach the rift sooner.'},
+  after:{tab:'gear',name:'Afterimage',cost:4,blurb:'Each rewind step leaves a frozen copy of Wren behind. Ground echoes stall at it until they break it or it fades after 6 s.'},
   mount:{tab:'sync',name:'Mounted weapon',cost:6,blurb:'Sync carries a bolt pistol and fires straight ahead on his own, using your Bolt pistol upgrades.'},
   auto:{tab:'sync',name:'Auto-deployer',cost:4,blurb:'Sync uses one of your consumables for you, once per run, when the trigger you pick happens.'},
   capacitor:{tab:'sync',name:'Stasis capacitor',cost:3,blurb:'Every freeze lasts 50% longer: cores, grenades and the shield burst.'},
@@ -215,6 +217,8 @@ const KIT={
 // levelled items; cur 'a' = anomalies, 's' = sparks. needs = the KIT item that must be owned first
 const LV={
   spear:{needs:'spear',name:'Spear charges',vals:[1,2,3,4],cost:[80,200,450],cur:'a',fmt:v=>v+' charge'+(v>1?'s':'')+', 6 s each to refill'},
+  after:{needs:'after',name:'Afterimage',vals:[0,1,2],cost:[3,5],cur:'s',fmt:v=>['Blocks ground echoes for 6 s','Also shoots at echoes for 6 s','Shoots, and lasts 9 s'][v],short:v=>['Blocks','Shoots','Lasts 9 s'][v]},
+  dodge:{name:'Long rewind',vals:[90,120,150,185,220],cost:[40,90,180,320],cur:'a',fmt:v=>Math.round(v/10)+' days back per rewind step'},
   rift:{name:'Rift breaker',vals:[8,6.8,5.6,4.5,3.5],cost:[2,3,5,8],cur:'s',fmt:v=>v.toFixed(1)+' s for Sync to open a rift'},
 };
 const lv=k=>LV[k].vals[save.lv[k]];
@@ -236,7 +240,7 @@ const PERKS={
 };
 const perk=k=>PERKS[k].vals[save.perk[k]];
 const SKEY='sdr-rift-v5';
-const fresh=()=>({level:1,coins:0,anchors:0,gun:'bolt',guns:{bolt:{owned:true,power:0,rate:0},arc:{owned:false,power:0,rate:0,chain:0}},gen:{sight:0,salvage:0},kit:{mount:false,auto:false,shield:false,capacitor:false,crit:false,boots:false,spear:false},lv:{spear:0,rift:0},cons:{grenade:0,wall:0,overclock:0,shock:0},auto:{item:'wall',trigger:'close'},
+const fresh=()=>({level:1,coins:0,anchors:0,gun:'bolt',guns:{bolt:{owned:true,power:0,rate:0},arc:{owned:false,power:0,rate:0,chain:0}},gen:{sight:0,salvage:0},kit:{mount:false,auto:false,shield:false,capacitor:false,crit:false,boots:false,spear:false,after:false},lv:{spear:0,rift:0,dodge:0,after:0},cons:{grenade:0,wall:0,overclock:0,shock:0},auto:{item:'wall',trigger:'close'},
   px:0,perk:{start:0,memory:0,anchor:0,seed:0,train:0},best:0,cycles:0});
 function load(){
   const f=fresh();
@@ -328,14 +332,14 @@ function buildLevel(n){
   G={n,L,x0,hs,px:L,camX:L-PSX,state:'shop',time:0,es:[],bolts:[],shards:[],parts:[],pickups:[],floats:[],rings:[],ghosts:[],cores:[],
      spawnAcc:0,queue:0,qT:0,s1:false,s2:false,wAcc:.55,tears:[],warned:false,queued:false,fireT:0,aim:-.08,press:false,drag:null,recoil:0,
      shake:0,slow:0,banner:null,earned:0,kills:0,endT:0,pfade:0,dead:false,arcs:[],shield:!!save.kit.shield,inv:0,nades:[],walls:[],clocks:[],oc:0,mT:.5,mAim:0,mFlash:0,autoUsed:false,
-     holding:false,hold:0,opened:false,sync:{x:L-26,y:300},spear:0,spearT:0,spearCd:0,jabs:[]};
+     holding:false,hold:0,opened:false,sync:{x:L-26,y:300},spear:0,spearT:0,spearCd:0,jabs:[],dash:null,trail:[]};
   for(let x=L-650;x>PORTAL+350;x-=600+r()*350)G.cores.push({x,alive:true,bob:r()*6,pts:Array.from({length:7},()=>r()*2-1)});
   [920,1040,1160].forEach((sx,i)=>{const e=mkEnemy('drifter',G.camX+sx,'idle');e.delay=.6+i*.5;G.es.push(e)});
   renderLayers(n);
 }
 function mkEnemy(type,x,state){
   const t=TYPES[type];
-  const hp=Math.round(t.hp*(1+.22*(G.n-1)));
+  const hp=Math.round(t.hp*(1+.15*(G.n-1)));
   const e={type,s:t.s,hp,max:hp,sp:t.sp*Math.min(1.4,1+.04*(G.n-1)),coin:t.coin,body:t.body,glow:t.glow,x,fy:0,phase:rand(0,6),
     state,delay:0,blink:rand(2.5,5),ph:rand(1.4,2.4),phased:false,frozen:0,flash:0,P:null};
   e.fy=ground(x);e.P=pose(e);return e;
@@ -345,7 +349,8 @@ function pickType(){
   let tot=w.reduce((a,b)=>a+b[1],0),r=Math.random()*tot;
   for(const[k,v]of w){if((r-=v)<0)return k}return 'drifter';
 }
-function spawn(type){if(G.es.length<28)G.es.push(mkEnemy(type,G.camX+W+30+rand(0,40),'walk'))}
+function spawn(type){if(G.es.length<28){const e=mkEnemy(type,G.camX+W+30+rand(0,40),'walk');if(G.holding)frenzy(e);G.es.push(e)}}
+function frenzy(e){if(e.frenzy)return;e.frenzy=true;e.s*=1.15;e.sp*=1.2;if(e.dsp)e.dsp*=1.15;e.flash=.12}
 function openTear(){
   const pts=[];for(let i=0;i<7;i++)pts.push(rand(-7,7));
   G.tears.push({x:G.camX+rand(560,1150),y:rand(70,170),t:.9,done:false,pts});sfx.tear();
@@ -353,7 +358,8 @@ function openTear(){
 }
 function spawnWraith(t){
   const e=mkEnemy('wraith',t.x,'walk');
-  e.y=t.y;e.ang=0;e.diving=false;e.vx=0;e.vy=0;e.dsp=210*Math.min(1.4,1+.05*(G.n-1));e.P=pose(e);
+  e.y=t.y;e.ang=0;e.diving=false;e.vx=0;e.vy=0;e.dsp=210*Math.min(1.4,1+.05*(G.n-1));
+  if(G.holding)frenzy(e);e.P=pose(e);
   G.es.push(e);
 }
 
@@ -565,13 +571,14 @@ $('#cbar').addEventListener('pointerdown',ev=>{const b=ev.target.closest('[data-
 addEventListener('keydown',ev=>{const k=Object.keys(CONS).find(c=>CONS[c].key===ev.key);if(k&&G.state==='play'){ev.preventDefault();useCons(k)}});
 function ghost(e){G.ghosts.push({P:e.P.map(p=>({...p})),e,t:.35})}
 // rewind step: snap further back along the path, briefly untouchable
-const DODGE_CD=8,DODGE_DIST=90;
+// rewind step: a quick eased dash backward that sheds cyan afterimages, untouchable while it lasts
+const DODGE_CD=8,DASH_DUR=.26;
 function dodge(){
-  if(G.state!=='play'||G.dodgeT>0)return;
-  const from=G.px,to=Math.max(G.holding?PORTAL+30:HOLDX,G.px-DODGE_DIST),fy=ground(from);
-  for(let i=0;i<18;i++){const x=from+(to-from)*Math.random();G.parts.push({x,y:ground(x)-rand(8,80),vx:rand(30,90),vy:rand(-20,20),life:rand(.25,.5),size:rand(2,4),col:pick(['#5ef2ff','#e6fdff','#ffb347','#3a4566'])})}
-  G.px=to;G.inv=Math.max(G.inv,.6);G.dodgeT=DODGE_CD;
-  noise(.25,5000,.14,'highpass');tone(1400,.22,.07,'sine',300);
+  if(G.state!=='play'||G.dodgeT>0||G.dash)return;
+  const from=G.px,to=Math.max(G.holding?PORTAL+30:HOLDX,G.px-lv('dodge'));
+  G.dash={from,to,t:0,tr:0};G.inv=Math.max(G.inv,.6);G.dodgeT=DODGE_CD;
+  if(save.kit.after){const hp=Math.round(140*(1+.15*(G.n-1)));G.walls.push({x:from+6,hp,max:hp,t:0,ghost:true,life:lv('after')>=2?9:6,aim:G.aim,fT:.2})}
+  noise(.3,5000,.14,'highpass');tone(1400,.26,.07,'sine',300);
 }
 $('#dodge').addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();audioInit();dodge()});
 addEventListener('keydown',ev=>{if(ev.code==='Space'&&G.state==='play'){ev.preventDefault();dodge()}});
@@ -581,7 +588,7 @@ function jab(e){
   const c=centre(e),from={x:G.px+8,y:ground(G.px)-54};
   G.jabs.push({x1:from.x,y1:from.y,x2:c.x,y2:c.y,t:.14});
   noise(.08,1800,.18,'bandpass');tone(320,.1,.08,'square',140);G.shake=Math.max(G.shake,3);
-  damage(e,60*(1+.22*(G.n-1)),c.x,c.y,500,-60,false);
+  damage(e,60*(1+.15*(G.n-1)),c.x,c.y,500,-60,false);
   if(!e.dead){
     if(e.type==='wraith'){e.diving=false;e.x+=110;e.y-=70}
     else{e.x+=60;e.frozen=Math.max(e.frozen,.35)}
@@ -601,19 +608,34 @@ function update(dt){
   const playing=G.state==='play';
   G.time+=dt;
   if(playing){
-    if(!G.holding){
+    if(G.dash){
+      const d=G.dash;d.t+=dt;const k=Math.min(1,d.t/DASH_DUR),e=1-Math.pow(1-k,3);
+      G.px=d.from+(d.to-d.from)*e;
+      d.tr-=dt;if(d.tr<=0){d.tr=.028;G.trail.push({x:G.px,t:.32,aim:G.aim})}
+      if(k>=1)G.dash=null;
+    }else if(!G.holding){
       G.px-=WALK*(save.kit.boots?1.15:1)*dt;
-      if(G.px<=HOLDX){G.px=HOLDX;G.holding=true;G.banner={txt:'HOLD THE LINE',t:2.2};tone(260,.6,.12,'triangle',520)}
+      if(G.px<=HOLDX){
+        G.px=HOLDX;G.holding=true;G.holdReal=performance.now();G.slow=RM?0:1.3;
+        tone(260,.6,.12,'triangle',520);noise(1.4,300,.35);tone(70,1.4,.18,'sawtooth',40);
+        for(const e of G.es)if(!e.dead&&e.state==='walk')e.mut=1.4;
+      }
     }else{
       G.hold+=dt;
+      const hf=Math.min(1,G.hold/lv('rift'));
+      if(!RM)G.shake=Math.max(G.shake,1+2.5*hf);
+      G.rumT=(G.rumT||0)-dt;if(G.rumT<=0){G.rumT=.7;noise(.8,160+120*hf,.12+.12*hf);tone(48,.8,.06+.05*hf,'sawtooth',38)}
       if(Math.random()<dt*30){const cy=ground(PORTAL)-92;G.parts.push({x:PORTAL+rand(-6,6),y:cy+rand(-60,60),vx:rand(-60,60),vy:rand(-80,20),life:rand(.3,.6),size:rand(2,3.5),col:pick(['#ffd36b','#ffb347','#fff2c4'])})}
       if(G.hold>=lv('rift')){
-        G.opened=true;G.state='ending';G.endT=1.6;sfx.rift();G.shake=RM?0:8;
+        G.opened=true;G.state='ending';G.endT=1.6;G.openT=0;G.flashW=RM?0:.9;sfx.rift();G.shake=RM?0:16;
+        noise(1.2,900,.5);tone(110,1,.25,'sawtooth',30);
+        {const cy=ground(PORTAL)-92,P=[];for(let i=0;i<16;i++)P.push({x:PORTAL+rand(-10,10),y:cy+rand(-90,90)});shatter(P,['#fff4cf','#ffd36b','#ffb347','#1a0b22'],0,-200,60)}
         for(const e of G.es)if(!e.dead){e.dead=true;shatter(e.P,[e.body,e.glow,'#5ef2ff'],300,-200,10)}
       }
     }
   }
-  if(G.state==='ending')G.px+=(PORTAL-G.px)*Math.min(1,dt*5);
+  if(G.state==='ending'){G.openT+=dt;if(G.openT>.35)G.px+=(PORTAL-G.px)*Math.min(1,dt*5)}
+  G.flashW=Math.max(0,(G.flashW||0)-dt*2.5);
   // spear: Zarya-style charges that refill one at a time; jabs fire on their own when something gets close
   if(save.kit.spear){
     const max=lv('spear');G.spearCd-=dt;
@@ -629,7 +651,8 @@ function update(dt){
     }
   }
   for(const j of G.jabs)j.t-=dt;G.jabs=G.jabs.filter(j=>j.t>0);
-  G.camX=G.px-PSX;
+  G.camX+=(G.px-PSX-G.camX)*Math.min(1,dt*9);
+  for(const t of G.trail)t.t-=dt;G.trail=G.trail.filter(t=>t.t>0);
   // Sync: at the rift while it opens; otherwise guards the nearest stasis crack ahead of Wren, else stays at his shoulder
   G.syncCore=null;
   if(!G.holding&&G.state==='play'){let bd=1e9;for(const c of G.cores)if(c.alive&&c.x>G.px+60&&c.x<G.camX+W-60&&c.x<bd){bd=c.x;G.syncCore=c}}
@@ -659,7 +682,22 @@ function update(dt){
   G.clocks=G.clocks.filter(c=>c.t<c.dur);
   const tc=G.clocks[G.clocks.length-1];
   if(tc&&tc.t<tc.dur){const n=Math.floor(tc.t/.5);if(n>=tc.lastTick){tc.lastTick=n+1;const left=1-tc.t/tc.dur;tone(n%2?900:1250,.05,.05+.04*left,'square',n%2?700:1000)}}
-  for(const w of G.walls)w.t+=dt;
+  for(const w of G.walls){
+    w.t+=dt;if(!w.ghost)continue;
+    w.life-=dt;if(w.life<=0)w.hp=0;
+    // upgraded afterimages keep shooting: weaker, slower shots from the frozen copy, aimed at the nearest echo
+    if(playing&&lv('after')>=1&&w.hp>0){
+      w.fT-=dt;
+      const sx=w.x+3,sy=ground(w.x)-58;let tgt=null,bd=1e9;
+      for(const e of G.es){if(e.dead||e.phased||e.state!=='walk'||e.x<w.x||e.x>G.camX+W)continue;const d=e.x-w.x;if(d<bd){bd=d;tgt=e}}
+      if(tgt){const c=centre(tgt);w.aim+=(clamp(Math.atan2(c.y-sy,c.x-sx),-1.3,1)-w.aim)*Math.min(1,dt*10)}
+      if(tgt&&w.fT<=0){
+        w.fT=gunStat('rate')*1.3;
+        G.bolts.push({x:sx+Math.cos(w.aim)*40,y:sy+Math.sin(w.aim)*40,vx:Math.cos(w.aim)*1400,vy:Math.sin(w.aim)*1400,life:1.1,arc:false,sync:true,dmg:gunStat('power')*.6});
+        tone(900,.05,.03,'triangle',300);
+      }
+    }
+  }
   G.walls=G.walls.filter(w=>w.hp>0&&w.x<G.camX+W+200);
   G.fireT-=dt;G.recoil*=Math.pow(.001,dt);G.shake*=Math.pow(.004,dt);
   if(playing&&G.fireT<=0&&G.es.some(e=>!e.dead&&e.state==='walk'&&e.x<G.camX+W))fire();
@@ -675,14 +713,14 @@ function update(dt){
     if(G.mT<=0&&G.es.some(e=>!e.dead&&e.state==='walk'&&e.x<G.camX+W)){
       const bu=GUNS.bolt.ups;G.mT=bu.rate.vals[save.guns.bolt.rate];G.mFlash=.06;
       const mz={x:m.x+Math.cos(G.mAim)*26,y:m.y+Math.sin(G.mAim)*26};
-      G.bolts.push({x:mz.x,y:mz.y,vx:Math.cos(G.mAim)*1400,vy:Math.sin(G.mAim)*1400,life:1.1,arc:false,dmg:bu.power.vals[save.guns.bolt.power]});
+      G.bolts.push({x:mz.x,y:mz.y,vx:Math.cos(G.mAim)*1400,vy:Math.sin(G.mAim)*1400,life:1.1,arc:false,sync:true,dmg:bu.power.vals[save.guns.bolt.power]});
       tone(1100,.06,.04,'triangle',300);
     }
   }
 
   if(playing){
     const prog=progress();
-    G.spawnAcc+=dt*(.42+.12*(G.n-1)+.5*prog)*(G.holding?1.5:1);
+    G.spawnAcc+=dt*(.3+.1*(G.n-1)+.4*prog)*(G.holding?1.3:1);
     if(G.spawnAcc>=1){G.spawnAcc-=1;spawn(pickType())}
     if(prog>.5)autoFire('half');
     if(G.es.some(e=>!e.dead&&e.state==='walk'&&!e.phased&&(e.type==='wraith'?Math.hypot(e.x-G.px,e.y-ground(G.px)+50)<80:e.x-G.px<80)))autoFire('close');
@@ -697,6 +735,8 @@ function update(dt){
   for(const e of G.es){
     if(e.dead)continue;
     e.flash-=dt;
+    // mutating: twitching in place, then they come out bigger, faster and sprouting tentacles
+    if(e.mut>0){e.mut-=dt;if(e.mut<=0)frenzy(e);e.P=pose(e);continue}
     if(e.type==='wraith'){
       if(G.state!=='lost'&&G.state!=='shop'){
         if(e.frozen>0)e.frozen-=dt;
@@ -773,13 +813,26 @@ function seg(a,b,w,col,cap){ctx.lineCap=cap||'round';ctx.strokeStyle=col;ctx.lin
 function figure(e,P,col){
   const s=e.s,tw=(e.type==='hulk'?20:14)*s;
   seg(P[2],P[5],5.5*s,col);seg(P[5],P[6],5.5*s,col);
-  seg(P[1],P[8],4*s,col);
+  if(e.frenzy)longArm(P[1],e,col,1.2);else seg(P[1],P[8],4*s,col);
   seg(P[1],P[2],tw,col,'butt');
   seg(P[2],P[3],5.5*s,col);seg(P[3],P[4],5.5*s,col);
-  seg(P[1],P[7],4.5*s,col);
+  if(e.frenzy)longArm(P[1],e,col,0);else seg(P[1],P[7],4.5*s,col);
   ctx.fillStyle=col;ctx.beginPath();ctx.arc(P[0].x,P[0].y,8.5*s,0,7);ctx.fill();
+  if(e.frenzy){const h=P[0];ctx.beginPath();for(const d of[-1,1]){ctx.moveTo(h.x+d*3*s-2*s,h.y-6*s);ctx.lineTo(h.x+d*6*s+2*s,h.y-17*s);ctx.lineTo(h.x+d*7*s,h.y-4*s)}ctx.fill()}
+}
+// mutated walkers: arms stretch into long, whipping white limbs reaching for Wren
+function longArm(o,e,col,seed){
+  const s=e.s;let x=o.x,y=o.y+5*s,a=Math.PI+.25+seed*.15;
+  ctx.lineCap='round';ctx.strokeStyle=col;
+  for(let k=0;k<7;k++){
+    a+=Math.sin(G.time*6+seed*2+k*.9+(e.blink||0))*.22;
+    const nx=x+Math.cos(a)*8*s,ny=y+Math.sin(a)*8*s;
+    ctx.lineWidth=(4.5-k*.5)*s;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(nx,ny);ctx.stroke();x=nx;y=ny;
+  }
 }
 function drawWraith(e,P,alpha){
+  if(e.mut>0){ctx.save();ctx.translate(rand(-4,4),rand(-3,3));const m=e.mut;e.mut=0;drawWraith(e,P,alpha);e.mut=m;ctx.restore();return}
+  if(e.frenzy&&alpha===1){const a0=(P[1].a||0);tentacles([[P[6],a0+.3],[P[6],a0-.3],[P[1],a0+1.4]],e.s*.8,e.blink||0,1)}
   const c=P[1],a=c.a||0,s=e.s,f=e.diving?-.3:Math.sin(e.phase);
   const wx=e.diving?22*s:8*s,wy=-6*s-16*s*Math.max(-.3,f),wy2=6*s+12*s*Math.max(-.3,-f);
   ctx.globalAlpha=alpha;
@@ -808,10 +861,39 @@ function drawTear(t){
   }
   ctx.restore();
 }
+// red edges that pulse harder as the rift opens, plus the HOLD THE LINE banner that starts mid-screen and shrinks to the top
+function drawHoldFx(){
+  const f=Math.min(1,G.hold/lv('rift')),rt=(performance.now()-G.holdReal)/1000,pulse=.5+.5*Math.sin(rt*5);
+  const a=.18+.32*f+.1*pulse;
+  for(const[x0,y0,x1,y1,w,h]of[[0,0,0,140,W,140],[0,H,0,H-140,W,140],[0,0,170,0,170,H],[W,0,W-170,0,170,H]]){
+    const g=ctx.createLinearGradient(x0,y0,x1,y1);g.addColorStop(0,`rgba(200,20,45,${a})`);g.addColorStop(1,'rgba(200,20,45,0)');
+    ctx.fillStyle=g;ctx.fillRect(Math.min(x0,x1),Math.min(y0,y1),w,h);
+  }
+  const k=clamp((rt-1.3)/.6,0,1),e=k*k*(3-2*k),y=320+(118-320)*e,bh=110+(36-110)*e,size=62+(22-62)*e;
+  const fade=Math.min(1,rt/.2);
+  ctx.globalAlpha=fade;
+  ctx.fillStyle='rgba(11,7,22,.72)';ctx.fillRect(0,y-bh/2,W,bh);
+  ctx.fillStyle='#ffb347';ctx.fillRect(0,y-bh/2,W,2);ctx.fillRect(0,y+bh/2-2,W,2);
+  text('HOLD THE LINE',640,y-(e<1?10*(1-e):0),size,'#ffd36b');
+  if(e<1){ctx.globalAlpha=fade*(1-e);text('The Unbound is fighting back. Sync needs time to open the rift.',640,y+30,17,'#f3eefe')}
+  ctx.globalAlpha=1;
+}
+function tentacles(origins,s,seed,alpha){
+  ctx.lineCap='round';
+  origins.forEach(([o,ang],i)=>{
+    let x=o.x,y=o.y,a=ang;const n=6,len=7*s;
+    for(let k=0;k<n;k++){
+      a+=Math.sin(G.time*5+seed+i*1.7+k*.8)*.35;
+      const nx=x+Math.cos(a)*len,ny=y+Math.sin(a)*len;
+      ctx.strokeStyle=`rgba(255,79,154,${alpha*(.85-k*.1)})`;ctx.lineWidth=(4.2-k*.6)*s;
+      ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(nx,ny);ctx.stroke();x=nx;y=ny;
+    }
+  });
+}
 function drawEcho(e,P,alpha){
   if(e.type==='wraith'){drawWraith(e,P,alpha);return}
   ctx.globalAlpha=alpha*(e.phased?.2:1);
-  const j=0;
+  const j=e.mut>0?rand(-4,4):0;
   if(e.type==='splitter'&&alpha===1){
     const hurt=1-Math.max(0,e.hp/e.max),sep=5+11*hurt+Math.sin(G.time*(4+8*hurt))*1.5;
     for(const d of[-sep,sep]){ctx.save();ctx.globalAlpha=.3+.25*hurt;ctx.translate(d,0);figure(e,P,'#ff4f9a');ctx.restore()}
@@ -826,12 +908,32 @@ function drawEcho(e,P,alpha){
     ctx.fillStyle='#ffb347';ctx.beginPath();ctx.arc(P[0].x,P[0].y,8.5*s,0,7);ctx.fill();
     ctx.strokeStyle='rgba(255,179,71,.45)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(P[0].x,P[0].y,11.5*s,0,7);ctx.stroke();
   }
-  ctx.fillStyle='#1a0f2e';ctx.fillRect(P[0].x-7*s,P[0].y-2*s,7*s,2.6*s);
-  ctx.fillStyle=e.glow;ctx.fillRect(P[0].x-7*s,P[0].y-2*s,2.5*s,2.6*s);
+  if(e.frenzy){
+    const h=P[0];
+    ctx.fillStyle='rgba(255,46,79,.35)';ctx.beginPath();ctx.arc(h.x-4*s,h.y-1*s,6*s,0,7);ctx.fill();
+    ctx.fillStyle='#ff2e4f';ctx.beginPath();ctx.moveTo(h.x-8*s,h.y-3*s);ctx.lineTo(h.x-1*s,h.y-1*s);ctx.lineTo(h.x-8*s,h.y+.5*s);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#1a0f2e';ctx.lineWidth=1.4*s;ctx.lineJoin='miter';ctx.beginPath();
+    ctx.moveTo(h.x-8*s,h.y+3.5*s);for(let i=1;i<=5;i++)ctx.lineTo(h.x-8*s+i*2*s,h.y+(i%2?5.5:3.5)*s);ctx.stroke();
+  }else{
+    ctx.fillStyle='#1a0f2e';ctx.fillRect(P[0].x-7*s,P[0].y-2*s,7*s,2.6*s);
+    ctx.fillStyle=e.glow;ctx.fillRect(P[0].x-7*s,P[0].y-2*s,2.5*s,2.6*s);
+  }
   ctx.restore();
   if(e.frozen>0){ctx.strokeStyle=`rgba(127,212,255,${Math.min(.8,e.frozen)})`;ctx.lineWidth=2;ctx.setLineDash([4,5]);ctx.beginPath();ctx.arc(P[2].x,P[2].y-12*s,32*s,0,7);ctx.stroke();ctx.setLineDash([])}
   if(e.hp<e.max&&alpha===1){const w=26*s,x=P[0].x-w/2,y=P[0].y-18*s;ctx.fillStyle='rgba(255,255,255,.15)';ctx.fillRect(x,y,w,2.5);ctx.fillStyle=e.glow;ctx.fillRect(x,y,w*Math.max(0,e.hp/e.max),2.5)}
   ctx.globalAlpha=1;
+}
+// a flat cyan silhouette of Wren, used for dash afterimages and the Afterimage decoy
+function ghostWren(x,a,aim){
+  if(a<=0)return;
+  const fy=ground(x),c=`rgba(94,242,255,${a})`;
+  ctx.save();ctx.fillStyle=c;ctx.strokeStyle=c;ctx.lineCap='round';
+  ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(x-3,fy-30);ctx.lineTo(x-8,fy-3);ctx.moveTo(x+4,fy-30);ctx.lineTo(x+9,fy-3);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x-9,fy-64);ctx.lineTo(x+9,fy-64);ctx.lineTo(x+12,fy-24);ctx.lineTo(x-14,fy-20);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.arc(x+1,fy-75,9.5,0,7);ctx.fill();
+  ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(x+3,fy-58);ctx.lineTo(x+3+Math.cos(aim)*36,fy-58+Math.sin(aim)*36);ctx.stroke();
+  ctx.fillStyle=`rgba(230,253,255,${a})`;ctx.fillRect(x+2,fy-77,9,3);
+  ctx.restore();
 }
 function drawPlayer(){
   if(G.dead)return;
@@ -891,8 +993,8 @@ function drawSync(){
   if(save.kit.mount){
     ctx.save();ctx.translate(s.x+10,s.y+8);ctx.rotate(G.mAim);
     ctx.fillStyle='#2c3350';ctx.fillRect(-2,-3,22,5);
-    ctx.fillStyle='#ffb347';ctx.fillRect(3,-2,10,1.3);
-    if(G.mFlash>0){ctx.beginPath();ctx.moveTo(20,-5);ctx.lineTo(29,-.5);ctx.lineTo(20,3);ctx.fill()}
+    ctx.fillStyle='#5ef2ff';ctx.fillRect(3,-2,10,1.3);
+    if(G.mFlash>0){ctx.fillStyle='#b4f7ff';ctx.beginPath();ctx.moveTo(20,-5);ctx.lineTo(29,-.5);ctx.lineTo(20,3);ctx.fill()}
     ctx.restore();
   }
   ctx.translate(s.x,s.y);
@@ -907,11 +1009,12 @@ function drawSync(){
   ctx.fillStyle=work?'#ffd36b':'#5ef2ff';ctx.beginPath();ctx.arc(1,0,3,0,7);ctx.fill();
   ctx.restore();
 }
+function crackPts(){if(!G.cpts)G.cpts=Array.from({length:11},()=>rand(-1,1));return G.cpts}
 function drawCrack(){
   const sx=PORTAL,cy=ground(PORTAL)-92;
   if(sx-G.camX<-120||sx-G.camX>W+120)return;
   const f=G.holding?Math.min(1,G.hold/lv('rift')):0,h=70+30*f,w=2+16*f;
-  if(!G.cpts){const p=[];for(let i=0;i<=10;i++)p.push(rand(-1,1));G.cpts=p}
+  crackPts();
   ctx.save();ctx.translate(sx,cy);
   const glow=ctx.createRadialGradient(0,0,2,0,0,60+40*f);glow.addColorStop(0,`rgba(255,211,107,${.25+.4*f})`);glow.addColorStop(1,'rgba(255,211,107,0)');
   ctx.fillStyle=glow;ctx.save();ctx.scale(.5,1);ctx.beginPath();ctx.arc(0,0,60+40*f,0,7);ctx.fill();ctx.restore();
@@ -922,20 +1025,29 @@ function drawCrack(){
   if(G.holding){ctx.strokeStyle='rgba(255,211,107,.9)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,-h-22,9,-Math.PI/2,-Math.PI/2+f*Math.PI*2);ctx.stroke()}
   ctx.restore();
 }
+// once Sync breaks through, the same jagged crack is torn wide open: a ragged gash onto a black void, rim trembling
 function drawPortal(){
   if(!G.opened){drawCrack();return}
   const sx=PORTAL,cy=ground(PORTAL)-92;
-  if(sx-G.camX<-120||sx-G.camX>W+120)return;
+  if(sx-G.camX<-160||sx-G.camX>W+160)return;
+  const t=clamp((G.openT||0)/.3,0,1),k=1-Math.pow(1-t,3),h=100+110*k,w=18+64*k,jit=RM?0:3+5*k;
   ctx.save();ctx.translate(sx,cy);
-  const g=ctx.createRadialGradient(0,0,4,0,0,80);g.addColorStop(0,'rgba(255,255,255,.95)');g.addColorStop(.35,'rgba(255,79,154,.7)');g.addColorStop(1,'rgba(255,79,154,0)');
-  ctx.save();ctx.scale(.45,1);ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,80,0,7);ctx.fill();ctx.restore();
-  for(let i=0;i<5;i++){
-    ctx.strokeStyle=i%2?`rgba(94,242,255,${.7-i*.1})`:`rgba(255,79,154,${.8-i*.1})`;ctx.lineWidth=2.5;
-    ctx.setLineDash([14,10]);ctx.lineDashOffset=G.time*40*(i%2?1:-1);
-    ctx.beginPath();ctx.ellipse(0,0,30+i*7,78+i*8,0,0,7);ctx.stroke();
-  }
-  ctx.setLineDash([]);
-  for(let i=0;i<10;i++){const a=G.time*(1.5+i*.1)+i*2.1,rr=40+((G.time*30+i*13)%50);ctx.fillStyle='#e6fdff';ctx.fillRect(Math.cos(a)*rr*.5,Math.sin(a)*rr,2,2)}
+  const glow=ctx.createRadialGradient(0,0,10,0,0,150);glow.addColorStop(0,'rgba(255,211,107,.55)');glow.addColorStop(1,'rgba(255,211,107,0)');
+  ctx.fillStyle=glow;ctx.save();ctx.scale(.6,1);ctx.beginPath();ctx.arc(0,0,150,0,7);ctx.fill();ctx.restore();
+  crackPts();
+  if(!G.rpts){G.rpts=[];for(let i=0;i<=22;i++)G.rpts.push([rand(-1,1),rand(.45,1),rand(.45,1)])}
+  const n=G.rpts.length-1,L=[],R=[];
+  // sawtooth edges: every other point bites inward so the tear reads as ripped, not rounded
+  G.rpts.forEach(([o,bl,br],i)=>{const y=-h+i*(2*h/n),taper=Math.pow(Math.sin(i/n*Math.PI),.55),x=o*14*k+G.cpts[Math.round(i/n*(G.cpts.length-1))]*6;
+    L.push({x:x-w*taper*(i%2?bl:1)-rand(0,jit),y:y+rand(-jit,jit)});R.push({x:x+w*taper*(i%2?1:br)+rand(0,jit),y:y+rand(-jit,jit)})});
+  const path=()=>{ctx.beginPath();L.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));for(let i=R.length-1;i>=0;i--)ctx.lineTo(R[i].x,R[i].y);ctx.closePath()};
+  path();ctx.strokeStyle='rgba(255,211,107,.35)';ctx.lineWidth=16;ctx.lineJoin='miter';ctx.stroke();
+  path();ctx.strokeStyle='#ffd36b';ctx.lineWidth=6;ctx.stroke();
+  path();const v=ctx.createRadialGradient(0,0,4,0,0,w+10);v.addColorStop(0,'#000000');v.addColorStop(.6,'#0e0414');v.addColorStop(1,'#2c0d24');ctx.fillStyle=v;ctx.fill();
+  path();ctx.strokeStyle='#fff4cf';ctx.lineWidth=2;ctx.stroke();
+  ctx.strokeStyle='rgba(255,236,180,.8)';ctx.lineWidth=1.5;
+  for(const side of[L,R])for(let i=1;i<side.length-1;i+=2){const p=side[i],d=side===L?-1:1,len=rand(10,26)*k;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x+d*len,p.y+rand(-10,10));ctx.stroke()}
+  for(let i=0;i<6;i++){ctx.fillStyle='rgba(255,244,207,.8)';ctx.fillRect(rand(-w*.6,w*.6),rand(-h*.7,h*.7),2,2)}
   ctx.restore();
 }
 function text(t,x,y,size,col,al){
@@ -975,8 +1087,13 @@ function render(){
   }
   for(const p of G.pickups){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(G.time*3+p.v);ctx.fillStyle='#5ef2ff';ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(4,0);ctx.lineTo(0,6);ctx.lineTo(-4,0);ctx.closePath();ctx.fill();ctx.restore()}
   for(const w of G.walls){
-    const gy=ground(w.x),h=110*Math.min(1,w.t/.18),x=w.x-8,top=gy-h;
     w.hit=(w.hit||0)-1/60;
+    if(w.ghost){
+      const a=Math.min(1,w.life/.6)*(w.hit>0?.85:.6);ghostWren(w.x,a,w.aim||0);
+      if(w.hp<w.max){const gy=ground(w.x);ctx.fillStyle='rgba(255,255,255,.15)';ctx.fillRect(w.x-14,gy-104,28,3);ctx.fillStyle='#5ef2ff';ctx.fillRect(w.x-14,gy-104,28*w.hp/w.max,3)}
+      continue;
+    }
+    const gy=ground(w.x),h=110*Math.min(1,w.t/.18),x=w.x-8,top=gy-h;
     ctx.fillStyle=w.hit>0?'rgba(230,253,255,.45)':'rgba(94,242,255,.16)';ctx.fillRect(x,top,16,h);
     ctx.strokeStyle='rgba(94,242,255,.8)';ctx.lineWidth=2;ctx.strokeRect(x,top,16,h);
     ctx.strokeStyle='rgba(94,242,255,.35)';ctx.lineWidth=1;ctx.beginPath();
@@ -991,6 +1108,7 @@ function render(){
   for(const t of G.tears)drawTear(t);
   for(const g of G.ghosts)drawEcho(g.e,g.P,g.t/.35*.5);
   for(const e of G.es)drawEcho(e,e.P,1);
+  for(const t of G.trail)ghostWren(t.x,t.t/.32*.55,t.aim);
   drawPlayer();
   drawSync();
   for(const s of G.shards){ctx.globalAlpha=Math.min(1,s.life*1.4);ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.a);ctx.fillStyle=s.col;ctx.beginPath();ctx.moveTo(-s.size/2,s.size/3);ctx.lineTo(s.size/2,s.size/2);ctx.lineTo(0,-s.size/2);ctx.closePath();ctx.fill();ctx.restore()}
@@ -1022,6 +1140,7 @@ function render(){
     if(b.arc){const t={x:b.x-b.vx*.025,y:b.y-b.vy*.025},z=zigzag(t,b);
       ctx.lineCap='round';ctx.lineJoin='round';
       for(const[w,c]of[[5,'rgba(94,242,255,.35)'],[1.6,'#e6fdff']]){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();z.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke()}}
+    else if(b.sync){seg({x:b.x-b.vx*.02,y:b.y-b.vy*.02},b,4,'rgba(94,242,255,.6)');seg({x:b.x-b.vx*.012,y:b.y-b.vy*.012},b,1.6,'#e6fdff')}
     else{seg({x:b.x-b.vx*.02,y:b.y-b.vy*.02},b,4,'rgba(255,179,71,.6)');seg({x:b.x-b.vx*.012,y:b.y-b.vy*.012},b,1.6,'#fff6e0')}
   }
   for(const a of G.arcs){
@@ -1051,13 +1170,15 @@ function render(){
   for(const f of G.floats){ctx.globalAlpha=Math.min(1,f.t*2);text(f.txt,f.x,f.y,18,f.col);ctx.globalAlpha=1}
   ctx.setTransform(K,0,0,K,0,0);
   const eg=ctx.createLinearGradient(W-150,0,W,0);eg.addColorStop(0,'rgba(11,7,22,0)');eg.addColorStop(1,'rgba(11,7,22,.85)');ctx.fillStyle=eg;ctx.fillRect(W-150,0,150,H);
-  if(G.state==='play'&&G.n===1&&G.time<6){
+  if(G.state==='play'&&G.n===1&&G.time<6&&!G.holding){
     ctx.globalAlpha=Math.min(1,(6-G.time));
     text(inputMode==='touch'?'DRAG UP OR DOWN TO AIM':'AIM WITH THE MOUSE',640,250,40);
     text('You walk back and fire on your own. Tap the « button or press Space to rewind-step out of danger.',640,292,17,'#a99ec4');
     ctx.globalAlpha=1;
   }
-  if(G.banner){ctx.globalAlpha=Math.min(1,G.banner.t,2.2-G.banner.t+.2);text(G.banner.txt,640,150,30,'#ff4f9a');ctx.globalAlpha=1}
+  if(G.banner){ctx.globalAlpha=Math.min(1,G.banner.t,2.2-G.banner.t+.2);text(G.banner.txt,640,G.holding?172:150,30,'#ff4f9a');ctx.globalAlpha=1}
+  if(G.holding&&!G.opened)drawHoldFx();
+  if(G.flashW>0){ctx.fillStyle=`rgba(255,244,214,${G.flashW})`;ctx.fillRect(0,0,W,H)}
 }
 
 // ---------- HUD + UI ----------
@@ -1100,6 +1221,8 @@ const ICON={
   mount:ic('<path d="M6 12l5-5 5 5-5 5z"/><circle cx="11" cy="12" r="1.3"/><path d="M15 12h10M19 9v6"/>'),
   spear:ic('<path d="M4 24 20 8"/><path d="M18 5l5 0 0 5-5 3-3-3z"/><path d="M7 18l3 3"/>'),
   rift:ic('<path d="M14 2l-3 6 4 4-5 5 4 4-2 5"/><path d="M8 9l-3 2M20 12l3-2M9 20l-3 1"/>'),
+  dodge:ic('<path d="M13 7 6 14l7 7M21 7l-7 7 7 7"/>'),
+  after:ic('<circle cx="18" cy="7" r="3"/><path d="M18 10v8M15 25l3-7 3 7"/><path d="M9 9v14M5 11v10" stroke-dasharray="2 2"/>'),
   auto:ic('<rect x="5" y="9" width="18" height="14" rx="1"/><path d="M14 9V4M10 4h8M10 16l3 3 5-6"/>'),
   capacitor:ic('<path d="M9 5v18M19 5v18M3 14h6M19 14h6"/><path d="M12 10l4 4-4 4"/>'),
   crit:ic('<circle cx="14" cy="14" r="9"/><circle cx="14" cy="14" r="3" fill="#ffb347" stroke="#ffb347"/><path d="M14 2v4M14 22v4M2 14h4M22 14h4"/>'),
@@ -1120,14 +1243,14 @@ Object.assign(ICON,{
 });
 function upRow(key,name,def,lv,act,cur='a'){
   const cost=def.cost[lv],v=def.vals,sp=cur==='s',have=sp?save.anchors:save.coins;
-  const val=def.fmt(v[lv])+(cost!==undefined?` <em>→ ${def.fmt(v[lv+1]).split(' ')[0]}</em>`:'');
+  const val=def.fmt(v[lv])+(cost!==undefined?` <em>→ ${def.short?def.short(v[lv+1]):def.fmt(v[lv+1]).split(' ')[0]}</em>`:'');
   const btn=cost===undefined?`<button class="buy ghost" type="button" disabled>Maxed</button>`
     :`<button class="buy${sp?' anc':''}" type="button" data-act="${act}" aria-label="Upgrade ${name} for ${cost} ${sp?'sparks':'anomalies'}" ${have>=cost?'':'disabled'}>${sp?ANC:CHRON}${cost}</button>`;
   return `<div class="up"><div class="ico">${ICON[key]}</div><div class="txt"><b>${name}</b><span class="val">${val}</span><div class="ticks">${v.map((_,i)=>`<i class="${i<=lv?'on':''}"></i>`).join('')}</div></div>${btn}</div>`;
 }
 function kitRow(k){
   const d=KIT[k],own=save.kit[k];
-  if(k==='spear'&&own)return upRow('spear',LV.spear.name,LV.spear,save.lv.spear,'lv:spear',LV.spear.cur);
+  if((k==='spear'||k==='after')&&own)return upRow(k,LV[k].name,LV[k],save.lv[k],'lv:'+k,LV[k].cur);
   const cfg=k==='auto'&&own?`<div class="cfg">Use <select id="autoItem" aria-label="Consumable to deploy">${Object.entries(CONS).map(([c,v])=>`<option value="${c}"${save.auto.item===c?' selected':''}>${v.name}</option>`).join('')}</select> when <select id="autoTrig" aria-label="Trigger">${Object.entries(TRIG).map(([t,v])=>`<option value="${t}"${save.auto.trigger===t?' selected':''}>${v}</option>`).join('')}</select></div>`:'';
   return `<div class="up"><div class="ico">${ICON[k]}</div><div class="txt"><b>${d.name}</b><span class="val">${d.blurb}</span>${cfg}</div>${own?`<button class="buy ghost" type="button" disabled>Owned</button>`:`<button class="buy anc" type="button" data-act="kit:${k}" aria-label="Buy ${d.name} for ${d.cost} sparks" ${save.anchors>=d.cost?'':'disabled'}>${ANC}${d.cost}</button>`}</div>`;
 }
@@ -1148,7 +1271,8 @@ function renderShop(){
     h+=`<p class="lbl">${GUNS[g].name}</p>`+Object.entries(GUNS[g].ups).map(([k,d])=>upRow(k,d.name,d,save.guns[g][k],`gun:${g}:${k}`)).join('');
     h+=`<p class="note">Sight and Anomaly Collector are in Gear. Switch weapons in Weapons.</p>`;
   }else if(shopTab==='gear'){
-    h=kitRow('shield')+kitRow('spear')+upRow('sight',GEN.sight.name,GEN.sight,save.gen.sight,'gen:sight')
+    h=kitRow('shield')+kitRow('spear')+upRow('dodge',LV.dodge.name,LV.dodge,save.lv.dodge,'lv:dodge',LV.dodge.cur)+kitRow('after')
+      +upRow('sight',GEN.sight.name,GEN.sight,save.gen.sight,'gen:sight')
       +upRow('salvage',GEN.salvage.name,GEN.salvage,save.gen.salvage,'gen:salvage')+kitRow('boots');
   }else if(shopTab==='sync'){
     h=kitRow('mount')+kitRow('auto')+kitRow('capacitor')+kitRow('crit')+upRow('rift',LV.rift.name,LV.rift,save.lv.rift,'lv:rift',LV.rift.cur);
@@ -1230,7 +1354,7 @@ function showDead(){
   save.coins+=dist;persist();
   showMsg(`Rift ${G.n} · ${pct}% of the way`,'Erased',
     `<div>Anomalies collected<b>+${G.earned}</b></div><div>Distance bonus (${pct}%)<b>+${dist}</b></div><p>An echo caught you ${fmtDays(daysLeft(G.px))} short of the rift. Everything you earned is yours to keep.</p>`,
-    'Try again',()=>{buildLevel(G.n);enterShop()},false);
+    'Again',()=>{buildLevel(G.n);enterShop()},false);
 }
 function startOver(){
   const gain=newCycle();
