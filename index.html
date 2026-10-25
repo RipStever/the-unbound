@@ -16,7 +16,14 @@
 html{height:100%;box-sizing:border-box}
 body{height:100%;margin:0;box-sizing:border-box;background:var(--bg);color:var(--ink);font-family:var(--display);
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px;
-  overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+  overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overscroll-behavior:none}
+/* phones in landscape: use every pixel (the safe-area insets still keep clear of notches) */
+@media (max-height:520px){body{padding-block:0;padding-left:max(4px,env(safe-area-inset-left,0px));padding-right:max(4px,env(safe-area-inset-right,0px))}}
+#rotate{display:none;position:fixed;inset:0;z-index:20;background:var(--bg);color:var(--ink);place-items:center;text-align:center;padding:24px;font-family:var(--display)}
+#rotate svg{width:72px;height:72px;margin-bottom:14px;color:var(--amber)}
+#rotate p{margin:0;font-size:20px;letter-spacing:.06em}
+#rotate small{display:block;margin-top:8px;font-family:var(--body);font-size:14px;color:var(--dim)}
+@media (orientation:portrait) and (max-width:760px){#rotate{display:grid}}
 #wrap{position:relative;width:100%;height:100%;overflow:hidden}
 #stage{position:absolute;left:50%;top:50%;width:1280px;height:640px;transform:translate(-50%,-50%);transform-origin:center;overflow:hidden;box-shadow:0 0 0 1px rgba(94,242,255,.18),0 18px 50px rgba(0,0,0,.6)}
 #c{position:absolute;left:0;top:0;width:1280px;height:640px;display:block;touch-action:none;cursor:crosshair}
@@ -150,6 +157,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .cfg select:focus-visible{outline:2px solid var(--line);outline-offset:1px}
 </style>
 
+<div id="rotate" role="alert"><div><svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="15" y="6" width="18" height="32" rx="3"/><path d="M38 30a14 14 0 0 1-12 12M26 46l0-4 4 0"/></svg><p>Turn your phone sideways</p><small>The Unbound plays in landscape.</small></div></div>
 <div id="wrap">
   <div id="stage">
     <canvas id="c" width="1280" height="640"></canvas>
@@ -1698,6 +1706,7 @@ const ICON={
   spear:ic('<path d="M4 24 20 8"/><path d="M18 5l5 0 0 5-5 3-3-3z"/><path d="M7 18l3 3"/>'),
   rift:ic('<path d="M14 2l-3 6 4 4-5 5 4 4-2 5"/><path d="M8 9l-3 2M20 12l3-2M9 20l-3 1"/>'),
   dodge:ic('<path d="M13 7 6 14l7 7M21 7l-7 7 7 7"/>'),
+  size:ic('<circle cx="9" cy="14" r="3"/><circle cx="19" cy="14" r="6"/><path d="M2 14h2"/>'),
   after:ic('<circle cx="18" cy="7" r="3"/><path d="M18 10v8M15 25l3-7 3 7"/><path d="M9 9v14M5 11v10" stroke-dasharray="2 2"/>'),
   auto:ic('<rect x="5" y="9" width="18" height="14" rx="1"/><path d="M14 9V4M10 4h8M10 16l3 3 5-6"/>'),
   capacitor:ic('<path d="M9 5v18M19 5v18M3 14h6M19 14h6"/><path d="M12 10l4 4-4 4"/>'),
@@ -1813,7 +1822,9 @@ $('#shop').addEventListener('click',ev=>{
   persist();sfx.buy();renderShop();
 });
 function enterShop(){G.state='shop';shopTab='up';$('#shop').hidden=false;$('#msg').hidden=true;$('#cbar').hidden=true;$('#dodge').hidden=true;renderShop()}
-$('#go').addEventListener('click',()=>{audioInit();$('#shop').hidden=true;G.state='play';G.time=0;G.spear=save.kit.spear?lv('spear'):0;renderCbar();$('#cbar').hidden=!Object.values(save.cons).some(n=>n>0);$('#dodge').hidden=false});
+// on touch devices, starting a run asks for fullscreen (Android allows it; iOS quietly refuses, which is fine)
+function tryFullscreen(){const d=document.documentElement;if(inputMode==='touch'&&!document.fullscreenElement&&d.requestFullscreen)d.requestFullscreen({navigationUI:'hide'}).catch(()=>{})}
+$('#go').addEventListener('click',()=>{audioInit();tryFullscreen();$('#shop').hidden=true;G.state='play';G.time=0;G.spear=save.kit.spear?lv('spear'):0;renderCbar();$('#cbar').hidden=!Object.values(save.cons).some(n=>n>0);$('#dodge').hidden=false});
 function showMsg(eyebrow,title,rows,go,onGo,alt){
   $('#msgE').textContent=eyebrow;$('#msgT').textContent=title;$('#msgB').innerHTML=rows;
   const b=$('#msgGo');b.textContent=go;b.onclick=onGo;

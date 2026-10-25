@@ -1,3 +1,6 @@
+# build output (GitHub Pages builds this in CI)
+_site/
+
 # local tooling
 .claude/
 .vscode/

@@ -1,0 +1,14 @@
+{
+  "name": "The Unbound",
+  "short_name": "The Unbound",
+  "description": "Walk backward through broken time toward the rift.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0b0716",
+  "theme_color": "#0b0716",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
