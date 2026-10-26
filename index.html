@@ -172,6 +172,11 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 #spearPips.empty svg{opacity:.2}#dodge.cool{cursor:default}
 #dodge.cool svg{opacity:.18}
 #dodge:not(.cool):hover{background-color:rgba(94,242,255,.12)}
+.autochip.px{border-color:rgba(255,90,90,.55);color:#ff5a5a}
+.keep{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:#ff5a5a;background:none;border:1.5px dashed rgba(255,90,90,.6);padding:5px 10px;cursor:pointer}
+.keep.on{background:#ff5a5a;color:var(--ink);border-style:solid}
+.keep:disabled{opacity:.35;cursor:default}
+.keep svg{width:12px;height:12px}
 .autochip{align-self:flex-end;display:grid;gap:2px;padding:6px 10px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--line);background:rgba(18,10,34,.72);border:1px dashed rgba(94,242,255,.45)}
 .autochip small{font-size:10px;color:var(--dim)}
 .autochip.used{opacity:.4}
@@ -242,6 +247,8 @@ const FIRE=[.8,.75,.7,.65,.61,.57,.53,.49,.46,.43,.4,.37,.35,.33,.31];
 const COST=[8,16,28,44,65,90,120,160,210,280,370,480,620,800];
 const SIGHT=[90,160,240,330,430,560,720,900];
 const ARCFIRE=[1.05,.98,.92,.86,.8,.75,.7,.65,.61,.57,.53,.5,.47,.44,.41];
+const SCATFIRE=[1.1,1.03,.97,.91,.85,.8,.75,.7,.66,.62,.58,.55,.52,.49,.46];
+const RAILFIRE=[2.2,2.08,1.96,1.85,1.74,1.64,1.55,1.46,1.38,1.3,1.22,1.15,1.08,1.02,.96];
 const GUNS={
   bolt:{name:'Bolt pistol',unlock:0,col:'#ffb347',blurb:'Single bolts. Headshots crit for 2.5x damage.',ups:{
     power:{name:'Bolt power',vals:[14,17,20,24,28,32,37,42,47,52,58,64,70,77,85],cost:COST,fmt:v=>v+' damage per bolt'},
@@ -252,6 +259,16 @@ const GUNS={
     power:{name:'Arc power',vals:[13,15,18,21,25,29,33,38,42,47,52,57,63,69,75],cost:COST,fmt:v=>v+' damage per strike'},
     rate:{name:'Fire rate',vals:ARCFIRE,cost:COST,fmt:v=>v.toFixed(2)+' s between shots'},
     chain:{name:'Chain',vals:[2,3,4,5,6,7,8,9],cost:[30,80,180,350,600,950,1400],fmt:v=>'Up to '+v+' extra '+(v>1?'echoes':'echo')+' hit per shot'},
+  }},
+  scatter:{name:'Shard scatter',unlock:6,start:3,col:'#ff8a3d',blurb:'Fires a fan of short-range time shards. Brutal up close, useless at range. Shard headshots still crit.',ups:{
+    power:{name:'Shard power',vals:[6,7,8,9,10,12,13,15,17,19,21,23,26,29,32],cost:COST,fmt:v=>v+' damage per shard'},
+    rate:{name:'Fire rate',vals:SCATFIRE,cost:COST,fmt:v=>v.toFixed(2)+' s between shots'},
+    pellets:{name:'Shards',vals:[5,6,7,8,9,10],cost:[30,80,180,350,600],fmt:v=>v+' shards per shot'},
+  }},
+  rail:{name:'Stopwatch rail',unlock:9,start:3,col:'#e6fdff',blurb:'Charges up, then fires a beam that pierces every echo in a line. Slow, but it hits hard and headshots crit.',ups:{
+    power:{name:'Rail power',vals:[40,48,56,65,75,86,98,110,124,138,154,170,188,207,228],cost:COST,fmt:v=>v+' damage to everything in the line'},
+    rate:{name:'Charge time',vals:RAILFIRE,cost:COST,fmt:v=>v.toFixed(2)+' s to charge'},
+    stop:{name:'Stop time',vals:[0,.3,.5,.7,.9,1.2],cost:[30,80,180,350,600],fmt:v=>v?'Freezes everything it hits for '+v+' s':'No freeze',short:v=>v+' s'},
   }},
 };
 const GEN={
@@ -293,11 +310,14 @@ const PERKS={
   anchor:{name:'Spark yield',vals:[0,1,2,3],cost:[2,4,7],fmt:v=>`+${v} extra sparks per rift cleared`,short:v=>'+'+v},
   seed:{name:'Seed sparks',vals:[0,2,4,6],cost:[1,3,5],fmt:v=>`Begin each cycle with ${v} sparks`,short:v=>v},
   train:{name:'Field training',vals:[0,1,2,3],cost:[2,4,7],fmt:v=>`Bolt pistol starts at power and fire rate level ${v}`,short:v=>'level '+v},
+  second:{name:'Second chance',vals:[0,1,2],cost:[4,9],fmt:v=>v?`Survive ${v} killing hit${v>1?'s':''} per run`:'No second chances yet',short:v=>v+(v>1?' hits':' hit')},
+  keep:{name:'Kept gear',vals:[0,1,2,3,4],cost:[3,5,8,12],fmt:v=>v?`Keep ${v} gear or Sync item${v>1?'s':''} through every cycle`:'Nothing is kept between cycles',short:v=>v+(v>1?' items':' item'),note:'Tap Keep on an owned card in the Gear or Sync tab.'},
+  kit:{name:'Starting kit',vals:[0,1,2,3],cost:[2,4,7],fmt:v=>v?`Begin each cycle with ${v} of every consumable`:'Begin each cycle with no consumables',short:v=>v+' each'},
 };
 const perk=k=>PERKS[k].vals[save.perk[k]];
 const SKEY='sdr-rift-v5';
-const fresh=()=>({level:1,coins:0,anchors:0,gun:'bolt',guns:{bolt:{owned:true,power:0,rate:0,size:0},arc:{owned:false,power:0,rate:0,chain:0}},gen:{sight:0,salvage:0},kit:{mount:false,auto:false,shield:false,capacitor:false,crit:false,boots:false,spear:false,after:false},lv:{spear:0,rift:0,dodge:0,after:0},cons:{grenade:0,wall:0,overclock:0,shock:0,lull:0},auto:{item:'wall',trigger:'close'},
-  px:0,perk:{start:0,memory:0,anchor:0,seed:0,train:0},best:0,cycles:0});
+const fresh=()=>({level:1,coins:0,anchors:0,gun:'bolt',guns:{bolt:{owned:true,power:0,rate:0,size:0},arc:{owned:false,power:0,rate:0,chain:0},scatter:{owned:false,power:0,rate:0,pellets:0},rail:{owned:false,power:0,rate:0,stop:0}},gen:{sight:0,salvage:0},kit:{mount:false,auto:false,shield:false,capacitor:false,crit:false,boots:false,spear:false,after:false},lv:{spear:0,rift:0,dodge:0,after:0},cons:{grenade:0,wall:0,overclock:0,shock:0,lull:0},auto:{item:'wall',trigger:'close'},
+  px:0,perk:{start:0,memory:0,anchor:0,seed:0,train:0,second:0,keep:0,kit:0},kept:{},best:0,cycles:0});
 function load(){
   const f=fresh();
   try{const s=JSON.parse(localStorage.getItem(SKEY));if(s&&s.guns&&s.level){
@@ -318,9 +338,12 @@ const gen=k=>GEN[k].vals[save.gen[k]];
 const salv=()=>gen('salvage')*perk('memory');
 function newCycle(){
   const gain=save.level-1;
-  const keep={px:save.px+gain,perk:save.perk,best:Math.max(save.best,gain),cycles:save.cycles+1,auto:save.auto,storyAnchors:save.storyAnchors||0};
+  const keep={px:save.px+gain,perk:save.perk,best:Math.max(save.best,gain),cycles:save.cycles+1,auto:save.auto,storyAnchors:save.storyAnchors||0,kept:save.kept||{}};
   save=Object.assign(fresh(),keep);
   save.coins=perk('start');save.anchors=perk('seed');
+  // Kept gear: items marked Keep stay owned, up to the perk's slots. Starting kit refills the consumables bag.
+  let slots=perk('keep');for(const k of Object.keys(save.kept))if(save.kept[k]&&KIT[k]&&slots>0){save.kit[k]=true;slots--}else delete save.kept[k];
+  for(const k in save.cons)save.cons[k]=perk('kit');
   save.guns.bolt.power=save.guns.bolt.rate=perk('train');
   persist();return gain;
 }
@@ -388,7 +411,7 @@ function buildLevel(n){
   G={n,L,x0,hs,px:L,camX:L-PSX,state:'shop',time:0,es:[],bolts:[],shards:[],parts:[],pickups:[],floats:[],rings:[],ghosts:[],cores:[],
      spawnAcc:0,queue:0,qT:0,s1:false,s2:false,wAcc:.55,tears:[],warned:false,queued:false,fireT:0,aim:-.08,press:false,drag:null,recoil:0,
      shake:0,slow:0,banner:null,earned:0,kills:0,endT:0,pfade:0,dead:false,arcs:[],shield:!!save.kit.shield,inv:0,nades:[],walls:[],clocks:[],oc:0,mT:.5,mAim:0,mFlash:0,autoUsed:false,
-     holding:false,hold:0,opened:false,sync:{x:L-26,y:300},spear:0,spearT:0,spearCd:0,jabs:[],dash:null,trail:[]};
+     holding:false,hold:0,opened:false,sync:{x:L-26,y:300},spear:0,spearT:0,spearCd:0,jabs:[],dash:null,trail:[],beams:[],lives:perk('second')};
   for(let x=L-650;x>PORTAL+350;x-=600+r()*350)G.cores.push({x,alive:true,bob:r()*6,pts:Array.from({length:7},()=>r()*2-1)});
   [920,1040,1160].forEach((sx,i)=>{const e=mkEnemy('drifter',G.camX+sx,'idle');e.delay=.6+i*.5;G.es.push(e)});
   if(n%5===0)G.boss=makeBoss(n);
@@ -521,14 +544,46 @@ function shoulder(){return{x:G.px+2,y:ground(G.px)-58}}
 function mountPos(){return{x:G.sync.x,y:G.sync.y-24+Math.sin(G.time*3.4)*2}}
 function muzzle(){const s=shoulder(),c=Math.cos(G.aim),n=Math.sin(G.aim),l=40-G.recoil;return{x:s.x+c*l+n*3,y:s.y+n*l-c*3}}
 function fire(){
-  const arc=save.gun==='arc';
-  G.fireT=gunStat('rate')*(G.oc>0?.5:1);G.recoil=arc?3:5;G.shake=Math.max(G.shake,1.5);
+  const g=save.gun;
+  G.fireT=gunStat('rate')*(G.oc>0?.5:1);G.recoil={arc:3,scatter:7,rail:9}[g]||5;G.shake=Math.max(G.shake,1.5);
   const m=muzzle();
-  if(arc){arcFire(m);return}
+  if(g==='arc'){arcFire(m);return}
+  if(g==='rail'){railFire(m);return}
+  if(g==='scatter'){scatterFire(m);return}
   G.bolts.push({x:m.x,y:m.y,vx:Math.cos(G.aim)*1400,vy:Math.sin(G.aim)*1400,life:1.1,arc:false,rad:boltRad()});
   for(let i=0;i<3;i++)G.parts.push({x:m.x,y:m.y,vx:Math.cos(G.aim)*rand(60,200)+rand(-60,60),vy:Math.sin(G.aim)*rand(60,200)+rand(-60,60),life:.18,size:2.5,col:'#ffd08a'});
   sfx.shot();
 }
+// shard scatter: a fan of short-lived shards, so it only reaches echoes that are already close
+function scatterFire(m){
+  const n=gunStat('pellets');
+  for(let i=0;i<n;i++){const a=G.aim+(i/(n-1)-.5)*.42+rand(-.03,.03),sp=rand(1150,1350);G.bolts.push({x:m.x,y:m.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:rand(.24,.3),shard:true,dmg:gunStat('power')})}
+  for(let i=0;i<8;i++)G.parts.push({x:m.x,y:m.y,vx:Math.cos(G.aim)*rand(80,260)+rand(-90,90),vy:Math.sin(G.aim)*rand(80,260)+rand(-90,90),life:.2,size:rand(2,3.5),col:pick(['#ff8a3d','#ffd08a','#fff2c4'])});
+  G.shake=Math.max(G.shake,RM?0:3);noise(.14,1600,.24);tone(150,.12,.1,'square',55);
+}
+// stopwatch rail: a beam across the screen that pierces every echo along it, hitting each once
+const RAIL_LEN=1100;
+function railFire(m){
+  const dx=Math.cos(G.aim),dy=Math.sin(G.aim),stop=gunStat('stop'),hit=new Set(),B=G.boss&&G.boss.in&&!G.boss.dead?G.boss:null;
+  let end=null,bossDone=false;
+  for(let d=0;d<RAIL_LEN;d+=6){
+    const p={x:m.x+dx*d,y:m.y+dy*d,rad:4,vx:dx*1400,vy:dy*1400};
+    if(p.y>=ground(p.x)){end=p;break}
+    if(B)for(const q of B.proj)if(Math.hypot(p.x-q.x,p.y-q.y)<17)popProj(q);
+    for(const e of G.es){
+      if(hit.has(e)||e.dead||e.phased||e.state==='idle'&&G.state!=='play')continue;
+      const part=echoPart(e,p);if(!part)continue;
+      hit.add(e);boltHit(e,part,p);railBurst(p.x,p.y);
+      if(stop&&!e.dead)e.frozen=Math.max(e.frozen,stop*frz());
+    }
+    if(B&&!bossDone){const part=bossHitTest(p.x,p.y,4);if(part){bossDone=true;bossHit(part,gunStat('power'),p.x,p.y);railBurst(p.x,p.y);if(stop)B.frozen=Math.max(B.frozen,stop*.5)}}
+  }
+  end=end||{x:m.x+dx*RAIL_LEN,y:m.y+dy*RAIL_LEN};
+  G.beams.push({a:{x:m.x,y:m.y},b:{x:end.x,y:end.y},t:.32});
+  G.shake=Math.max(G.shake,RM?0:7);G.slow=Math.max(G.slow,RM?0:.05);
+  noise(.35,3200,.3,'bandpass');tone(1600,.3,.07,'sine',200);tone(70,.4,.2,'sawtooth',30);
+}
+function railBurst(x,y){for(let i=0;i<10;i++){const a=rand(0,Math.PI*2),v=rand(80,300);G.parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rand(.2,.4),size:rand(2,3.5),col:pick(['#e6fdff','#5ef2ff','#ffffff'])})}}
 // arc gun: instant lightning (no travelling projectile) out to ARC_RANGE, then it chains
 const ARC_RANGE=560,ARC_JUMP=187,ARC_STUN=.55;
 function arcFire(m){
@@ -558,13 +613,17 @@ function findHit(b){
 }
 // bolt radius from the Bolt size upgrade (pistol only). parts() lists the head first, so any overlap with a head is a crit
 const boltRad=()=>GUNS.bolt.ups.size.vals[save.guns.bolt.size||0];
-function findEcho(b){
+function echoPart(e,b){
   const R=b.rad||0;
+  if(e.type==='wraith')return Math.hypot(b.x-e.x,b.y-e.y)<=15*e.s+R?'body':null;
+  if(Math.abs(b.x-e.x)>45*e.s+R||b.y<e.P[0].y-20*e.s-R||b.y>e.fy+6+R)return null;
+  for(const[a,bb,r,part]of parts(e))if(distSeg(b.x,b.y,a,bb)<=r+R)return part;
+  return null;
+}
+function findEcho(b){
   for(const e of G.es){
     if(e.dead||e.phased||e.state==='idle'&&G.state!=='play')continue;
-    if(e.type==='wraith'){if(Math.hypot(b.x-e.x,b.y-e.y)<=15*e.s+R)return{e,part:'body'};continue}
-    if(Math.abs(b.x-e.x)>45*e.s+R||b.y<e.P[0].y-20*e.s-R||b.y>e.fy+6+R)continue;
-    for(const[a,bb,r,part]of parts(e))if(distSeg(b.x,b.y,a,bb)<=r+R)return{e,part};
+    const part=echoPart(e,b);if(part)return{e,part};
   }
   return null;
 }
@@ -575,7 +634,7 @@ function damage(e,dmg,x,y,vx,vy,crit){
 }
 function boltHit(e,part,b){
   const crit=part==='head';
-  if(crit)G.floats.push({x:e.P[0].x,y:e.P[0].y-20,txt:'CRIT',t:.8,col:'#ffb347'});
+  if(crit&&!(e.critT>G.time)){e.critT=G.time+.25;G.floats.push({x:e.P[0].x,y:e.P[0].y-20,txt:'CRIT',t:.8,col:'#ffb347'})}
   damage(e,(b.dmg||gunStat('power'))*(crit?2.5:part==='leg'?.7:1),b.x,b.y,b.vx,b.vy,crit);
 }
 function zigzag(a,b){
@@ -656,7 +715,8 @@ function breakWall(w){
 }
 function renderCbar(){
   $('#cbar').innerHTML=Object.entries(CONS).map(([k,d])=>`<button type="button" class="cb" data-use="${k}" aria-label="Use ${d.name} (${save.cons[k]} left, key ${d.key})" ${save.cons[k]?'':'disabled'}><span class="k">${d.key}</span>${ICON[k]}<span class="n">${save.cons[k]}</span></button>`).join('')
-    +(save.kit.auto?`<span class="autochip${G.autoUsed?' used':''}">Auto · ${CONS[save.auto.item].name}<small>${G.autoUsed?'used':'armed'}</small></span>`:'');
+    +(save.kit.auto?`<span class="autochip${G.autoUsed?' used':''}">Auto · ${CONS[save.auto.item].name}<small>${G.autoUsed?'used':'armed'}</small></span>`:'')
+    +(G.lives>0?`<span class="autochip px">Second chance<small>${G.lives} left</small></span>`:'');
 }
 $('#cbar').addEventListener('pointerdown',ev=>{const b=ev.target.closest('[data-use]');if(!b||b.disabled)return;ev.preventDefault();ev.stopPropagation();audioInit();useCons(b.dataset.use)});
 addEventListener('keydown',ev=>{const k=Object.keys(CONS).find(c=>CONS[c].key===ev.key);if(k&&G.state==='play'){ev.preventDefault();useCons(k)}});
@@ -707,12 +767,24 @@ function jab(e){const c=centre(e);spearStrike(c.x,c.y)}
 function lose(){
   if(G.state!=='play'||G.inv>0)return;
   if(G.shield){breakShield();return}
+  if(G.lives>0){secondChance();return}
   G.state='lost';G.endT=1.8;G.press=false;G.dead=true;
   const fy=ground(G.px),P=[];for(let i=0;i<14;i++)P.push({x:G.px+rand(-10,10),y:fy-rand(5,85)});
   shatter(P,['#232a3f','#3a4566','#ffb347','#ffb347','#1a2030'],-200,-150,40);
   G.shake=RM?0:12;sfx.erased();persist();
 }
 
+// Second chance (paradox perk): a killing hit is undone. A freeze burst goes off and nearby echoes are thrown clear.
+function secondChance(){
+  G.lives--;G.inv=1.6;G.flashW=RM?0:.7;
+  const y=ground(G.px)-50;stasisAt(G.px,y,2);
+  for(const e of G.es){
+    if(e.dead)continue;
+    if(e.type==='wraith'){if(Math.hypot(e.x-G.px,e.y-y)<260){e.diving=false;e.x+=180;e.y=Math.max(60,e.y-100)}}
+    else if(e.x-G.px<220)e.x=Math.max(e.x,G.px+160)+rand(0,60);
+  }
+  G.banner={txt:'SECOND CHANCE',t:1.8};renderCbar();
+}
 // ---------- boss: the Hollow Hour (every 5th rift) ----------
 // a pursuer: it crawls after Wren a little faster than he walks. You don't have to kill it, just reach the rift first.
 // its amber cores open and close; hitting an open core damages it and knocks it back. It also hurls shards you can shoot down.
@@ -785,7 +857,7 @@ function updateBoss(dt,playing,LS){
       }
       tone(240,.25,.08,'sawtooth',90);
     }
-    if(dist<BOSS_REACH){if(G.shield||G.inv>0){if(G.shield){lose();b.x+=220}}else lose()}
+    if(dist<BOSS_REACH&&G.inv<=0){if(G.shield||G.lives>0){lose();b.x+=220}else lose()}
   }
   const cy=ground(G.px)-50;
   for(const p of b.proj){
@@ -906,7 +978,7 @@ function startScene(kind){
   G.state='scene';G.blue=0;G.headShake=0;
   for(const e of G.es)if(!e.dead)e.dead=true;
   if(G.boss&&!G.boss.dead){G.boss.dead=true;G.boss.proj=[]}
-  G.bolts=[];G.arcs=[];G.jabs=[];G.tears=[];G.nades=[];G.shards=[];G.parts=[];G.pickups=[];G.clocks=[];G.rings=[];G.banner=null;G.bossCard=0;G.flashW=0;G.shake=0;
+  G.bolts=[];G.arcs=[];G.beams=[];G.jabs=[];G.tears=[];G.nades=[];G.shards=[];G.parts=[];G.pickups=[];G.clocks=[];G.rings=[];G.banner=null;G.bossCard=0;G.flashW=0;G.shake=0;
   for(const s of HUD_IN_SCENE)$(s).hidden=true;
   $('#skip').hidden=false;
 }
@@ -1155,7 +1227,7 @@ function update(dt){
        }
      }
    }}
-  G.inv-=dt;for(const a of G.arcs)a.t-=dt;G.arcs=G.arcs.filter(a=>a.t>0);
+  G.inv-=dt;for(const a of G.arcs)a.t-=dt;G.arcs=G.arcs.filter(a=>a.t>0);for(const a of G.beams)a.t-=dt;G.beams=G.beams.filter(a=>a.t>0);
   G.oc=Math.max(0,G.oc-dt);G.dodgeT=Math.max(0,(G.dodgeT||0)-dt);
   for(const n of G.nades){
     n.t+=dt;n.vy+=GRAV*.7*dt;n.x+=n.vx*dt;n.y+=n.vy*dt;
@@ -1179,8 +1251,8 @@ function update(dt){
       for(const e of G.es){if(e.dead||e.phased||e.state!=='walk'||e.x<w.x||e.x>G.camX+W)continue;const d=e.x-w.x;if(d<bd){bd=d;tgt=e}}
       if(tgt){const c=centre(tgt);w.aim+=(clamp(Math.atan2(c.y-sy,c.x-sx),-1.3,1)-w.aim)*Math.min(1,dt*10)}
       if(tgt&&w.fT<=0){
-        w.fT=gunStat('rate')*1.3;
-        G.bolts.push({x:sx+Math.cos(w.aim)*40,y:sy+Math.sin(w.aim)*40,vx:Math.cos(w.aim)*1400,vy:Math.sin(w.aim)*1400,life:1.1,arc:false,sync:true,dmg:gunStat('power')*.6});
+        const bu=GUNS.bolt.ups;w.fT=bu.rate.vals[save.guns.bolt.rate]*1.3;
+        G.bolts.push({x:sx+Math.cos(w.aim)*40,y:sy+Math.sin(w.aim)*40,vx:Math.cos(w.aim)*1400,vy:Math.sin(w.aim)*1400,life:1.1,arc:false,sync:true,dmg:bu.power.vals[save.guns.bolt.power]*.6});
         tone(900,.05,.03,'triangle',300);
       }
     }
@@ -1509,7 +1581,17 @@ function drawPlayer(){
   ctx.translate(s.x,s.y);ctx.rotate(G.aim);const r=G.recoil;
   ctx.fillStyle=coat2;ctx.fillRect(-4-r,-1,24,6);
   ctx.fillStyle=coat;ctx.fillRect(-4-r,-5,26,7);
-  if(arc){
+  if(save.gun==='rail'){
+    // the glow at the muzzle builds as the next shot charges
+    const f=clamp(1-G.fireT/gunStat('rate'),0,1),ga=ctx.globalAlpha;
+    ctx.fillStyle='#22304a';ctx.fillRect(16-r,-8,34,7);ctx.fillRect(20-r,-1,5,8);
+    ctx.fillStyle='#16233a';ctx.fillRect(22-r,-11,22,3);
+    ctx.fillStyle=gc;ctx.fillRect(22-r,-5.5,24*f,2);
+    ctx.globalAlpha=ga*(.25+.75*f);ctx.beginPath();ctx.arc(52-r,-4.5,1.5+4.5*f,0,7);ctx.fill();ctx.globalAlpha=ga;
+  }else if(save.gun==='scatter'){
+    ctx.fillStyle='#2c3350';ctx.fillRect(18-r,-10,18,11);ctx.fillRect(21-r,0,5,8);
+    ctx.fillStyle=hc;for(const o of[-8,-5,-2])ctx.fillRect(36-r,o,4,2);
+  }else if(arc){
     ctx.fillStyle='#24304a';ctx.fillRect(18-r,-9,24,10);ctx.fillRect(21-r,0,5,8);
     ctx.strokeStyle=hc;ctx.lineWidth=1.5;for(let i=0;i<4;i++){ctx.beginPath();ctx.ellipse(25+i*4.5-r,-4,1.6,6.5,0,0,7);ctx.stroke()}
     ctx.fillStyle=hc;ctx.beginPath();ctx.arc(44-r,-4,G.fireT>gunStat('rate')-.08?6:3.5,0,7);ctx.fill();
@@ -1683,9 +1765,12 @@ function render(){
     if(b.arc){const t={x:b.x-b.vx*.025,y:b.y-b.vy*.025},z=zigzag(t,b);
       ctx.lineCap='round';ctx.lineJoin='round';
       for(const[w,c]of[[5,'rgba(94,242,255,.35)'],[1.6,'#e6fdff']]){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();z.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke()}}
+    else if(b.shard){seg({x:b.x-b.vx*.014,y:b.y-b.vy*.014},b,3.5,'rgba(255,138,61,.6)');seg({x:b.x-b.vx*.008,y:b.y-b.vy*.008},b,1.4,'#fff2c4')}
     else if(b.sync){seg({x:b.x-b.vx*.02,y:b.y-b.vy*.02},b,4,'rgba(94,242,255,.6)');seg({x:b.x-b.vx*.012,y:b.y-b.vy*.012},b,1.6,'#e6fdff')}
     else{const R=b.rad||0;seg({x:b.x-b.vx*.02,y:b.y-b.vy*.02},b,4+R*1.6,'rgba(255,179,71,.6)');seg({x:b.x-b.vx*.012,y:b.y-b.vy*.012},b,1.6+R*.5,'#fff6e0')}
   }
+  // rail beams: a wide cyan glow that narrows to a white-hot core as it fades
+  for(const bm of G.beams){const k=bm.t/.32;for(const[w,c]of[[4+16*k,`rgba(94,242,255,${.22*k})`],[1+6*k,`rgba(230,253,255,${.75*k})`],[2,`rgba(255,255,255,${k})`]])seg(bm.a,bm.b,w,c,'butt')}
   // lightning: re-jagged every frame so it crackles, with a thick glow, a white-hot core and short forks
   for(const a of G.arcs){
     const k=a.t/.2,len=Math.hypot(a.b.x-a.a.x,a.b.y-a.a.y),n=Math.max(6,Math.round(len/20)),amp=a.main?9:7;
@@ -1790,9 +1875,13 @@ const ICON={
   capacitor:ic('<path d="M9 5v18M19 5v18M3 14h6M19 14h6"/><path d="M12 10l4 4-4 4"/>'),
   crit:ic('<circle cx="14" cy="14" r="9"/><circle cx="14" cy="14" r="3" fill="#ffb347" stroke="#ffb347"/><path d="M14 2v4M14 22v4M2 14h4M22 14h4"/>'),
   boots:ic('<path d="M7 4v14l-3 4h14l6-3v-3l-8-2-2-10z"/><path d="M2 10h3M1 14h3"/>'),
+  pellets:ic('<circle cx="5" cy="14" r="2"/><path d="M9 12l14-7M9 14h16M9 16l14 7"/>'),
+  stop:ic('<circle cx="14" cy="16" r="9"/><path d="M14 16v-5M11 3h6M14 3v4M21 8l2-2"/>'),
 };
 const GUNART={
   bolt:c=>`<svg viewBox="0 0 84 30" aria-hidden="true"><path d="M6 8h52v9H32l-3 3v8H18l3-11H6z" fill="#2c3350"/><rect x="10" y="11" width="34" height="2.5" fill="${c}"/><circle cx="62" cy="12.5" r="3.5" fill="${c}"/></svg>`,
+  scatter:c=>`<svg viewBox="0 0 84 30" aria-hidden="true"><path d="M4 6h46v13H30l-3 3v6H16l3-9H4z" fill="#2c3350"/><g fill="${c}"><rect x="52" y="7" width="8" height="2.5"/><rect x="52" y="11.5" width="8" height="2.5"/><rect x="52" y="16" width="8" height="2.5"/></g><path d="M64 8l12-5M64 12.7h14M64 17.3l12 5" stroke="${c}" stroke-width="1.4" stroke-dasharray="3 3"/></svg>`,
+  rail:c=>`<svg viewBox="0 0 84 30" aria-hidden="true"><path d="M2 9h66v7H34l-3 3v9H20l3-12H2z" fill="#22304a"/><rect x="18" y="5" width="30" height="3" fill="#16233a"/><rect x="10" y="11.5" width="52" height="2" fill="${c}"/><circle cx="72" cy="12.5" r="4" fill="${c}"/><circle cx="72" cy="12.5" r="7" fill="none" stroke="${c}" stroke-width="1" opacity=".5"/></svg>`,
   arc:c=>`<svg viewBox="0 0 84 30" aria-hidden="true"><path d="M4 7h54v11H30l-2 2v8H17l3-10H4z" fill="#24304a"/><g fill="none" stroke="${c}" stroke-width="1.6">${[0,1,2,3,4].map(i=>`<ellipse cx="${28+i*6}" cy="12.5" rx="1.8" ry="7"/>`).join('')}</g><circle cx="64" cy="12.5" r="4" fill="${c}"/><path d="M68 12.5l5-4-2 5 6-1" fill="none" stroke="${c}" stroke-width="1.4"/></svg>`,
 };
 let shopTab='up',resetArm=0;
@@ -1803,6 +1892,9 @@ Object.assign(ICON,{
   p_anchor:ic('<path d="M14 3l9 5v10l-9 5-9-5V8z"/><path d="M14 10v6M11 13h6"/>'),
   p_seed:ic('<path d="M14 25V12"/><path d="M14 14c-6 0-8-4-8-8 6 0 8 4 8 8zM14 12c0-5 3-8 8-8 0 5-3 8-8 8z"/>'),
   p_train:ic('<circle cx="14" cy="14" r="10"/><circle cx="14" cy="14" r="5"/><path d="M14 2v4M14 22v4M2 14h4M22 14h4"/>'),
+  p_second:ic('<path d="M14 24s-9-5.5-9-12a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 6.5-9 12-9 12z"/><path d="M9 14h3l1.5-3 2 6 1.5-3h2"/>'),
+  p_keep:ic('<rect x="6" y="12" width="16" height="12" rx="1"/><path d="M10 12V8a4 4 0 0 1 8 0v4"/><circle cx="14" cy="18" r="1.6"/>'),
+  p_kit:ic('<path d="M5 10h18l-2 14H7z"/><path d="M10 10V7a4 4 0 0 1 8 0v3"/><path d="M11 16h6"/>'),
 });
 // loadout cards: one per item, sized for phones. Every card: icon tile, name, value → next, a progress bar, one big button.
 function cardHTML({icon,name,badge,val,next,desc,prog,btn,extra,eq}){
@@ -1810,21 +1902,27 @@ function cardHTML({icon,name,badge,val,next,desc,prog,btn,extra,eq}){
     `<b class="cd-name">${name}</b>`+(val?`<p class="cd-val">${val}${next?` <em>→ ${next}</em>`:''}</p>`:'')+(desc?`<p class="cd-desc">${desc}</p>`:'')+(extra||'')+
     (prog!=null?`<div class="cd-bar"><i style="width:${(prog*100).toFixed(0)}%"></i></div>`:'')+btn+`</div>`;
 }
-function upRow(key,name,def,lv,act,cur='a'){
+function upRow(key,name,def,lv,act,cur='a',extra=''){
   const cost=def.cost[lv],v=def.vals,sp=cur==='s',have=sp?save.anchors:save.coins;
   const btn=cost===undefined?`<button class="buy ghost" type="button" disabled>Maxed</button>`
     :`<button class="buy${sp?' anc':''}" type="button" data-act="${act}" aria-label="Upgrade ${name} for ${cost} ${sp?'sparks':'anomalies'}" ${have>=cost?'':'disabled'}>${sp?ANC:CHRON}${cost}</button>`;
-  return cardHTML({icon:ICON[key],name,badge:`Lv ${lv}/${v.length-1}`,val:def.fmt(v[lv]),next:cost!==undefined?(def.short?def.short(v[lv+1]):def.fmt(v[lv+1]).split(' ')[0]):'',prog:lv/(v.length-1),btn});
+  return cardHTML({icon:ICON[key],name,badge:`Lv ${lv}/${v.length-1}`,val:def.fmt(v[lv]),next:cost!==undefined?(def.short?def.short(v[lv+1]):def.fmt(v[lv+1]).split(' ')[0]):'',prog:lv/(v.length-1),btn,extra});
+}
+// Kept gear perk: owned gear and Sync items get a Keep toggle, limited to the perk's slots
+function keepBtn(k){
+  const n=perk('keep');if(!n||!save.kit[k])return '';
+  const on=!!save.kept[k],full=Object.values(save.kept).filter(Boolean).length>=n;
+  return `<button class="keep${on?' on':''}" type="button" data-act="keep:${k}" aria-pressed="${on}" ${!on&&full?'disabled':''}>${PXI}${on?'Kept':'Keep'}</button>`;
 }
 function kitRow(k){
   const d=KIT[k],own=save.kit[k];
-  if((k==='spear'||k==='after')&&own)return upRow(k,LV[k].name,LV[k],save.lv[k],'lv:'+k,LV[k].cur);
+  if((k==='spear'||k==='after')&&own)return upRow(k,LV[k].name,LV[k],save.lv[k],'lv:'+k,LV[k].cur,keepBtn(k));
   const cfg=k==='auto'&&own?`<div class="cfg"><label>Use<select id="autoItem">${Object.entries(CONS).map(([c,v])=>`<option value="${c}"${save.auto.item===c?' selected':''}>${v.name}</option>`).join('')}</select></label><label>When<select id="autoTrig">${Object.entries(TRIG).map(([t,v])=>`<option value="${t}"${save.auto.trigger===t?' selected':''}>${v}</option>`).join('')}</select></label></div>`:'';
   const btn=own?`<button class="buy ghost" type="button" disabled>Owned</button>`:`<button class="buy anc" type="button" data-act="kit:${k}" aria-label="Buy ${d.name} for ${d.cost} sparks" ${save.anchors>=d.cost?'':'disabled'}>${ANC}${d.cost}</button>`;
-  return cardHTML({icon:ICON[k],name:d.name,badge:own?'Owned':'',desc:cfg?'':d.blurb,extra:cfg,btn,eq:own});
+  return cardHTML({icon:ICON[k],name:d.name,badge:own?'Owned':'',desc:cfg?'':d.blurb,extra:cfg+keepBtn(k),btn,eq:own});
 }
 const kitDotFor=tab=>Object.keys(KIT).some(k=>KIT[k].tab===tab&&!save.kit[k]&&save.anchors>=KIT[k].cost);
-function gunStats(k){const u=GUNS[k].ups,l=save.guns[k];return `${u.power.vals[l.power]} dmg · ${u.rate.vals[l.rate].toFixed(2)} s`+(u.chain?` · ${u.chain.vals[l.chain]} jump${u.chain.vals[l.chain]>1?'s':''}`:'')}
+function gunStats(k){const u=GUNS[k].ups,l=save.guns[k];return `${u.power.vals[l.power]} dmg · ${u.rate.vals[l.rate].toFixed(2)} s`+(u.chain?` · ${u.chain.vals[l.chain]} jump${u.chain.vals[l.chain]>1?'s':''}`:'')+(u.pellets?` · ${u.pellets.vals[l.pellets]} shards`:'')}
 function renderShop(){
   $('#shopT').textContent='Rift '+G.n;
   $('#shopSub').textContent=`The rift is ${fmtDays(daysLeft(G.L))} back. Clear it for ${G.n+1+perk('anchor')} sparks.`;
@@ -1858,7 +1956,7 @@ function renderShop(){
       const lv=save.perk[k],cost=d.cost[lv],v=d.vals;
       const btn=cost===undefined?`<button class="buy ghost" type="button" disabled>Maxed</button>`
         :`<button class="buy red" type="button" data-act="perk:${k}" aria-label="Buy ${d.name} for ${cost} paradox" ${save.px>=cost?'':'disabled'}>${PXI}${cost}</button>`;
-      return cardHTML({icon:ICON['p_'+k],name:d.name,badge:`Lv ${lv}/${v.length-1}`,val:d.fmt(v[lv]),next:cost!==undefined?d.short(v[lv+1]):'',prog:lv/(v.length-1),btn});
+      return cardHTML({icon:ICON['p_'+k],name:d.name,badge:`Lv ${lv}/${v.length-1}`,val:d.fmt(v[lv]),next:cost!==undefined?d.short(v[lv+1]):'',desc:d.note&&lv?d.note:'',prog:lv/(v.length-1),btn});
     }).join('');
   }else if(shopTab==='cons'){
     h=Object.entries(CONS).map(([k,d])=>{
@@ -1887,7 +1985,7 @@ $('#shop').addEventListener('change',ev=>{
   persist();
 });
 $('#shop').addEventListener('click',ev=>{
-  const t=ev.target.closest('[data-tab]');if(t){shopTab=t.dataset.tab;renderShop();return}
+  const t=ev.target.closest('#seg [data-tab]');if(t){shopTab=t.dataset.tab;renderShop();return}
   const b=ev.target.closest('[data-act]');if(!b||b.disabled)return;
   audioInit();const[a,k,s]=b.dataset.act.split(':');
   if(a==='tipgo'||a==='tipx'){save.tipRift=G.n;persist();if(a==='tipgo')shopTab='cons';renderShop();return}
@@ -1903,7 +2001,9 @@ $('#shop').addEventListener('click',ev=>{
   else if(a==='perk'){const c=PERKS[k].cost[save.perk[k]];if(c===undefined||save.px<c)return;save.px-=c;save.perk[k]++;
     if(k==='start')save.coins+=PERKS.start.vals[save.perk[k]]-PERKS.start.vals[save.perk[k]-1];
     if(k==='seed')save.anchors+=PERKS.seed.vals[save.perk[k]]-PERKS.seed.vals[save.perk[k]-1];
-    if(k==='train'){const b=save.guns.bolt,v=PERKS.train.vals[save.perk[k]];b.power=Math.max(b.power,v);b.rate=Math.max(b.rate,v)}}
+    if(k==='train'){const b=save.guns.bolt,v=PERKS.train.vals[save.perk[k]];b.power=Math.max(b.power,v);b.rate=Math.max(b.rate,v)}
+    if(k==='kit')for(const c in save.cons)save.cons[c]=Math.min(CONS_MAX,save.cons[c]+1)}
+  else if(a==='keep'){const on=!save.kept[k];if(on&&Object.values(save.kept).filter(Boolean).length>=perk('keep'))return;save.kept[k]=on}
   else if(a==='reset'){
     if(Date.now()-resetArm>4000){resetArm=Date.now();renderShop();setTimeout(()=>{if(G.state==='shop'&&shopTab==='px')renderShop()},4100);return}
     resetArm=0;startOver();return;
