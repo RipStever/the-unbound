@@ -247,6 +247,7 @@ const FIRE=[.8,.75,.7,.65,.61,.57,.53,.49,.46,.43,.4,.37,.35,.33,.31];
 const COST=[8,16,28,44,65,90,120,160,210,280,370,480,620,800];
 const SIGHT=[90,160,240,330,430,560,720,900];
 const ARCFIRE=[1.05,.98,.92,.86,.8,.75,.7,.65,.61,.57,.53,.5,.47,.44,.41];
+const SMGFIRE=[.3,.28,.265,.25,.235,.22,.21,.2,.19,.18,.17,.16,.15,.14,.13];
 const SCATFIRE=[1.1,1.03,.97,.91,.85,.8,.75,.7,.66,.62,.58,.55,.52,.49,.46];
 const RAILFIRE=[2.2,2.08,1.96,1.85,1.74,1.64,1.55,1.46,1.38,1.3,1.22,1.15,1.08,1.02,.96];
 const GUNS={
@@ -254,6 +255,11 @@ const GUNS={
     power:{name:'Bolt power',vals:[14,17,20,24,28,32,37,42,47,52,58,64,70,77,85],cost:COST,fmt:v=>v+' damage per bolt'},
     rate:{name:'Fire rate',vals:FIRE,cost:COST,fmt:v=>v.toFixed(2)+' s between shots'},
     size:{name:'Bolt size',vals:[0,2,4,6,8,10],cost:[20,50,110,220,400],fmt:v=>v?'+'+v+' bolt radius, edge hits on a head still crit':'Standard bolts'},
+  }},
+  smg:{name:'Second hand',unlock:4,start:3,col:'#ffe066',blurb:'A rapid-fire SMG that ticks out light rounds. Two fire rate upgrades, and headshots still crit.',ups:{
+    power:{name:'Round power',vals:[5,6,7,8,9,10,11,12,14,15,17,18,20,22,24],cost:COST,fmt:v=>v+' damage per round'},
+    rate:{name:'Fire rate',vals:SMGFIRE,cost:COST,fmt:v=>v.toFixed(2)+' s between shots'},
+    tick:{name:'Tick rate',vals:[1,.92,.85,.78,.72,.66],cost:[30,80,180,350,600],fmt:v=>v===1?'Standard trigger':'+'+Math.round((1/v-1)*100)+'% fire rate on top',short:v=>'+'+Math.round((1/v-1)*100)+'%'},
   }},
   arc:{name:'Arc gun',unlock:5,start:3,col:'#5ef2ff',blurb:'Instant lightning that jumps between nearby echoes and stuns everything it hits, but it cannot Crit.',ups:{
     power:{name:'Arc power',vals:[13,15,18,21,25,29,33,38,42,47,52,57,63,69,75],cost:COST,fmt:v=>v+' damage per strike'},
@@ -316,7 +322,7 @@ const PERKS={
 };
 const perk=k=>PERKS[k].vals[save.perk[k]];
 const SKEY='sdr-rift-v5';
-const fresh=()=>({level:1,coins:0,anchors:0,gun:'bolt',guns:{bolt:{owned:true,power:0,rate:0,size:0},arc:{owned:false,power:0,rate:0,chain:0},scatter:{owned:false,power:0,rate:0,pellets:0},rail:{owned:false,power:0,rate:0,stop:0}},gen:{sight:0,salvage:0},kit:{mount:false,auto:false,shield:false,capacitor:false,crit:false,boots:false,spear:false,after:false},lv:{spear:0,rift:0,dodge:0,after:0},cons:{grenade:0,wall:0,overclock:0,shock:0,lull:0},auto:{item:'wall',trigger:'close'},
+const fresh=()=>({level:1,coins:0,anchors:0,gun:'bolt',guns:{bolt:{owned:true,power:0,rate:0,size:0},smg:{owned:false,power:0,rate:0,tick:0},arc:{owned:false,power:0,rate:0,chain:0},scatter:{owned:false,power:0,rate:0,pellets:0},rail:{owned:false,power:0,rate:0,stop:0}},gen:{sight:0,salvage:0},kit:{mount:false,auto:false,shield:false,capacitor:false,crit:false,boots:false,spear:false,after:false},lv:{spear:0,rift:0,dodge:0,after:0},cons:{grenade:0,wall:0,overclock:0,shock:0,lull:0},auto:{item:'wall',trigger:'close'},
   px:0,perk:{start:0,memory:0,anchor:0,seed:0,train:0,second:0,keep:0,kit:0},kept:{},best:0,cycles:0});
 function load(){
   const f=fresh();
@@ -334,6 +340,8 @@ function load(){
 function persist(){try{localStorage.setItem(SKEY,JSON.stringify(save))}catch(e){}}
 let save=load();
 const gunStat=k=>GUNS[save.gun].ups[k].vals[save.guns[save.gun][k]];
+// seconds between shots for Wren's gun; the Second hand's Tick rate multiplies on top of Fire rate
+const fireGap=()=>gunStat('rate')*(GUNS[save.gun].ups.tick?gunStat('tick'):1);
 const gen=k=>GEN[k].vals[save.gen[k]];
 const salv=()=>gen('salvage')*perk('memory');
 function newCycle(){
@@ -545,11 +553,12 @@ function mountPos(){return{x:G.sync.x,y:G.sync.y-24+Math.sin(G.time*3.4)*2}}
 function muzzle(){const s=shoulder(),c=Math.cos(G.aim),n=Math.sin(G.aim),l=40-G.recoil;return{x:s.x+c*l+n*3,y:s.y+n*l-c*3}}
 function fire(){
   const g=save.gun;
-  G.fireT=gunStat('rate')*(G.oc>0?.5:1);G.recoil={arc:3,scatter:7,rail:9}[g]||5;G.shake=Math.max(G.shake,1.5);
+  G.fireT=fireGap()*(G.oc>0?.5:1);G.recoil={arc:3,scatter:7,rail:9,smg:2}[g]||5;G.shake=Math.max(G.shake,1.5);
   const m=muzzle();
   if(g==='arc'){arcFire(m);return}
   if(g==='rail'){railFire(m);return}
   if(g==='scatter'){scatterFire(m);return}
+  if(g==='smg'){const a=G.aim+rand(-.035,.035);G.bolts.push({x:m.x,y:m.y,vx:Math.cos(a)*1500,vy:Math.sin(a)*1500,life:1,smg:true});G.parts.push({x:m.x,y:m.y,vx:Math.cos(a)*rand(80,220),vy:Math.sin(a)*rand(80,220),life:.12,size:2,col:'#fff2c4'});tone(rand(1100,1300),.05,.05,'triangle',400);noise(.03,4500,.04,'highpass');return}
   G.bolts.push({x:m.x,y:m.y,vx:Math.cos(G.aim)*1400,vy:Math.sin(G.aim)*1400,life:1.1,arc:false,rad:boltRad()});
   for(let i=0;i<3;i++)G.parts.push({x:m.x,y:m.y,vx:Math.cos(G.aim)*rand(60,200)+rand(-60,60),vy:Math.sin(G.aim)*rand(60,200)+rand(-60,60),life:.18,size:2.5,col:'#ffd08a'});
   sfx.shot();
@@ -1588,17 +1597,20 @@ function drawPlayer(){
     ctx.fillStyle='#16233a';ctx.fillRect(22-r,-11,22,3);
     ctx.fillStyle=gc;ctx.fillRect(22-r,-5.5,24*f,2);
     ctx.globalAlpha=ga*(.25+.75*f);ctx.beginPath();ctx.arc(52-r,-4.5,1.5+4.5*f,0,7);ctx.fill();ctx.globalAlpha=ga;
+  }else if(save.gun==='smg'){
+    ctx.fillStyle='#2c3350';ctx.fillRect(16-r,-7,26,7);ctx.fillRect(19-r,0,4,8);ctx.fillRect(27-r,0,4,10);
+    ctx.fillStyle=hc;ctx.fillRect(20-r,-5,16,1.5);ctx.fillRect(42-r,-5,4,2.5);
   }else if(save.gun==='scatter'){
     ctx.fillStyle='#2c3350';ctx.fillRect(18-r,-10,18,11);ctx.fillRect(21-r,0,5,8);
     ctx.fillStyle=hc;for(const o of[-8,-5,-2])ctx.fillRect(36-r,o,4,2);
   }else if(arc){
     ctx.fillStyle='#24304a';ctx.fillRect(18-r,-9,24,10);ctx.fillRect(21-r,0,5,8);
     ctx.strokeStyle=hc;ctx.lineWidth=1.5;for(let i=0;i<4;i++){ctx.beginPath();ctx.ellipse(25+i*4.5-r,-4,1.6,6.5,0,0,7);ctx.stroke()}
-    ctx.fillStyle=hc;ctx.beginPath();ctx.arc(44-r,-4,G.fireT>gunStat('rate')-.08?6:3.5,0,7);ctx.fill();
+    ctx.fillStyle=hc;ctx.beginPath();ctx.arc(44-r,-4,G.fireT>fireGap()-.08?6:3.5,0,7);ctx.fill();
   }else{
     ctx.fillStyle='#2c3350';ctx.fillRect(20-r,-8,20,8);ctx.fillRect(22-r,-1,5,8);
     ctx.fillStyle=hc;ctx.fillRect(24-r,-6,12,2);
-    ctx.beginPath();ctx.arc(40-r,-4,G.fireT>gunStat('rate')-.08?5:3,0,7);ctx.fill();
+    ctx.beginPath();ctx.arc(40-r,-4,G.fireT>fireGap()-.08?5:3,0,7);ctx.fill();
   }
   ctx.restore();
 }
@@ -1742,7 +1754,7 @@ function render(){
   for(const s of G.shards){ctx.globalAlpha=Math.min(1,s.life*1.4);ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.a);ctx.fillStyle=s.col;ctx.beginPath();ctx.moveTo(-s.size/2,s.size/3);ctx.lineTo(s.size/2,s.size/2);ctx.lineTo(0,-s.size/2);ctx.closePath();ctx.fill();ctx.restore()}
   ctx.globalAlpha=1;
   if(G.state==='play'&&G.fireT>0){
-    const s=shoulder(),f=1-G.fireT/gunStat('rate');
+    const s=shoulder(),f=1-G.fireT/fireGap();
     ctx.strokeStyle='rgba(255,179,71,.8)';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(s.x-1,s.y-40,7,-Math.PI/2,-Math.PI/2+f*Math.PI*2);ctx.stroke();
   }
   if(G.state==='play'){
@@ -1765,6 +1777,7 @@ function render(){
     if(b.arc){const t={x:b.x-b.vx*.025,y:b.y-b.vy*.025},z=zigzag(t,b);
       ctx.lineCap='round';ctx.lineJoin='round';
       for(const[w,c]of[[5,'rgba(94,242,255,.35)'],[1.6,'#e6fdff']]){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();z.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke()}}
+    else if(b.smg){seg({x:b.x-b.vx*.016,y:b.y-b.vy*.016},b,3,'rgba(255,224,102,.55)');seg({x:b.x-b.vx*.009,y:b.y-b.vy*.009},b,1.3,'#fffbe6')}
     else if(b.shard){seg({x:b.x-b.vx*.014,y:b.y-b.vy*.014},b,3.5,'rgba(255,138,61,.6)');seg({x:b.x-b.vx*.008,y:b.y-b.vy*.008},b,1.4,'#fff2c4')}
     else if(b.sync){seg({x:b.x-b.vx*.02,y:b.y-b.vy*.02},b,4,'rgba(94,242,255,.6)');seg({x:b.x-b.vx*.012,y:b.y-b.vy*.012},b,1.6,'#e6fdff')}
     else{const R=b.rad||0;seg({x:b.x-b.vx*.02,y:b.y-b.vy*.02},b,4+R*1.6,'rgba(255,179,71,.6)');seg({x:b.x-b.vx*.012,y:b.y-b.vy*.012},b,1.6+R*.5,'#fff6e0')}
@@ -1875,11 +1888,13 @@ const ICON={
   capacitor:ic('<path d="M9 5v18M19 5v18M3 14h6M19 14h6"/><path d="M12 10l4 4-4 4"/>'),
   crit:ic('<circle cx="14" cy="14" r="9"/><circle cx="14" cy="14" r="3" fill="#ffb347" stroke="#ffb347"/><path d="M14 2v4M14 22v4M2 14h4M22 14h4"/>'),
   boots:ic('<path d="M7 4v14l-3 4h14l6-3v-3l-8-2-2-10z"/><path d="M2 10h3M1 14h3"/>'),
+  tick:ic('<path d="M4 8l6 6-6 6M12 8l6 6-6 6"/><path d="M22 7v14"/>'),
   pellets:ic('<circle cx="5" cy="14" r="2"/><path d="M9 12l14-7M9 14h16M9 16l14 7"/>'),
   stop:ic('<circle cx="14" cy="16" r="9"/><path d="M14 16v-5M11 3h6M14 3v4M21 8l2-2"/>'),
 };
 const GUNART={
   bolt:c=>`<svg viewBox="0 0 84 30" aria-hidden="true"><path d="M6 8h52v9H32l-3 3v8H18l3-11H6z" fill="#2c3350"/><rect x="10" y="11" width="34" height="2.5" fill="${c}"/><circle cx="62" cy="12.5" r="3.5" fill="${c}"/></svg>`,
+  smg:c=>`<svg viewBox="0 0 84 30" aria-hidden="true"><path d="M8 9h50v8H40v10h-6V17h-6l-3 3v7H17l3-10H8z" fill="#2c3350"/><rect x="14" y="11.5" width="30" height="2" fill="${c}"/><g fill="${c}"><rect x="62" y="11.5" width="5" height="2"/><rect x="70" y="11.5" width="5" height="2"/><rect x="78" y="11.5" width="4" height="2"/></g></svg>`,
   scatter:c=>`<svg viewBox="0 0 84 30" aria-hidden="true"><path d="M4 6h46v13H30l-3 3v6H16l3-9H4z" fill="#2c3350"/><g fill="${c}"><rect x="52" y="7" width="8" height="2.5"/><rect x="52" y="11.5" width="8" height="2.5"/><rect x="52" y="16" width="8" height="2.5"/></g><path d="M64 8l12-5M64 12.7h14M64 17.3l12 5" stroke="${c}" stroke-width="1.4" stroke-dasharray="3 3"/></svg>`,
   rail:c=>`<svg viewBox="0 0 84 30" aria-hidden="true"><path d="M2 9h66v7H34l-3 3v9H20l3-12H2z" fill="#22304a"/><rect x="18" y="5" width="30" height="3" fill="#16233a"/><rect x="10" y="11.5" width="52" height="2" fill="${c}"/><circle cx="72" cy="12.5" r="4" fill="${c}"/><circle cx="72" cy="12.5" r="7" fill="none" stroke="${c}" stroke-width="1" opacity=".5"/></svg>`,
   arc:c=>`<svg viewBox="0 0 84 30" aria-hidden="true"><path d="M4 7h54v11H30l-2 2v8H17l3-10H4z" fill="#24304a"/><g fill="none" stroke="${c}" stroke-width="1.6">${[0,1,2,3,4].map(i=>`<ellipse cx="${28+i*6}" cy="12.5" rx="1.8" ry="7"/>`).join('')}</g><circle cx="64" cy="12.5" r="4" fill="${c}"/><path d="M68 12.5l5-4-2 5 6-1" fill="none" stroke="${c}" stroke-width="1.4"/></svg>`,
@@ -1922,7 +1937,7 @@ function kitRow(k){
   return cardHTML({icon:ICON[k],name:d.name,badge:own?'Owned':'',desc:cfg?'':d.blurb,extra:cfg+keepBtn(k),btn,eq:own});
 }
 const kitDotFor=tab=>Object.keys(KIT).some(k=>KIT[k].tab===tab&&!save.kit[k]&&save.anchors>=KIT[k].cost);
-function gunStats(k){const u=GUNS[k].ups,l=save.guns[k];return `${u.power.vals[l.power]} dmg · ${u.rate.vals[l.rate].toFixed(2)} s`+(u.chain?` · ${u.chain.vals[l.chain]} jump${u.chain.vals[l.chain]>1?'s':''}`:'')+(u.pellets?` · ${u.pellets.vals[l.pellets]} shards`:'')}
+function gunStats(k){const u=GUNS[k].ups,l=save.guns[k];return `${u.power.vals[l.power]} dmg · ${(u.rate.vals[l.rate]*(u.tick?u.tick.vals[l.tick]:1)).toFixed(2)} s`+(u.chain?` · ${u.chain.vals[l.chain]} jump${u.chain.vals[l.chain]>1?'s':''}`:'')+(u.pellets?` · ${u.pellets.vals[l.pellets]} shards`:'')}
 function renderShop(){
   $('#shopT').textContent='Rift '+G.n;
   $('#shopSub').textContent=`The rift is ${fmtDays(daysLeft(G.L))} back. Clear it for ${G.n+1+perk('anchor')} sparks.`;
